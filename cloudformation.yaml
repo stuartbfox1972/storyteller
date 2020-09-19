@@ -28,8 +28,6 @@ Resources:
           Action: 
           - dynamodb:*
           Resource:
-          - !GetAtt ParagraphsTable.Arn
-          - !GetAtt StoryFlowTable.Arn
           - !GetAtt StoriesTable.Arn
         - Effect: Allow
           Action:
@@ -90,55 +88,19 @@ Resources:
       #SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${__ApiId__}/*/*/*, __ApiId__: !Ref ApiGatewayRestApi
 
 # DynamoDB Tables
-  ParagraphsTable:
+  StoriesTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Sub "${AWS::StackName}-paragraphs"
       KeySchema:
-        - AttributeName: "paraid"
+        - AttributeName: "pk"
           KeyType: "HASH"
-      AttributeDefinitions:
-        - AttributeName: "paraid"
-          AttributeType: "S"
-      BillingMode: PAY_PER_REQUEST
-
-  StoryFlowTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Sub "${AWS::StackName}-storyflow"
-      KeySchema:
-        - AttributeName: "storyid"
-          KeyType: "HASH"
-        - AttributeName: "paraid"
+        - AttributeName: "sk"
           KeyType: "RANGE"
       AttributeDefinitions:
-        - AttributeName: "storyid"
+        - AttributeName: "pk"
           AttributeType: "S"
-        - AttributeName: "paraid"
-          AttributeType: "S"
-      BillingMode: PAY_PER_REQUEST
-    
-  StoriesTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Sub "${AWS::StackName}-stories"
-      KeySchema:
-        - AttributeName: "storyid"
-          KeyType: "HASH"
-      AttributeDefinitions:
-        - AttributeName: "storyid"
-          AttributeType: "S"
-      BillingMode: PAY_PER_REQUEST
-
-  TagsTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Sub "${AWS::StackName}-tags"
-      KeySchema:
-        - AttributeName: "tag"
-          KeyType: "HASH"
-      AttributeDefinitions:
-        - AttributeName: "tag"
+        - AttributeName: "sk"
           AttributeType: "S"
       BillingMode: PAY_PER_REQUEST
 
@@ -166,13 +128,8 @@ Resources:
     Properties:
       UserPoolName: !Sub ${AWS::StackName}-UserPool
       AliasAttributes:
-        - preferred_username
         - email
       Schema:
-        - Name: preferred_username
-          AttributeDataType: String
-          Mutable: true
-          Required: true
         - Name: email
           AttributeDataType: String
           Mutable: false
@@ -279,8 +236,6 @@ Resources:
         Uri:
           Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StoriesLambdaFunction.Arn}/invocations
 
-
-
   APIDeployment:
     DependsOn: StoryMethod
     Type: AWS::ApiGateway::Deployment
@@ -310,6 +265,8 @@ Outputs:
     Value: !Ref UserPool
   UserPoolClientId:
     Value: !Ref UserPoolClient
+  apiGatewayInvokeURL:
+    Value: !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/dev"
   #RestApiURL:
   #  Value: !Ref ApiGatewayRestApi.Arn
 
