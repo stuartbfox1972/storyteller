@@ -209,8 +209,8 @@ Resources:
             Scope: openid
             SessionCookieName: AWSELBAuthSessionCookie
             SessionTimeout: 60
-            UserPoolArn: !Ref UserPool.ProviderURL
-            UserPoolDomain: !GetAtt UserPool
+            UserPoolArn: !Ref UserPool
+            UserPoolDomain: !GetAtt UserPool.ProviderURL
             UserPoolClientId: !Ref UserPoolClient
         - Type: forward
           Order: 2
