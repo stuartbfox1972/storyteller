@@ -231,7 +231,7 @@ Resources:
             SessionCookieName: AWSELBAuthSessionCookie
             SessionTimeout: 60
             UserPoolArn: !GetAtt UserPool.Arn
-            UserPoolDomain: !GetAtt UserPool.ProviderURL
+            UserPoolDomain: !Ref UserPoolDomain
             UserPoolClientId: !Ref UserPoolClient
         - Type: forward
           Order: 2
