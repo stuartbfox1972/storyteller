@@ -148,7 +148,7 @@ Resources:
     Type: AWS::Cognito::UserPoolClient
     Properties:
       ClientName: !Sub ${AWS::StackName}-storyteller-web
-      GenerateSecret: false
+      GenerateSecret: true
       UserPoolId: !Ref UserPool
 
   ## ACM Cert Config Section
