@@ -151,10 +151,21 @@ Resources:
       Domain: !Select [2, !Split ['/', !Ref 'AWS::StackId']]
 
   UserPoolClient:
-    Type: AWS::Cognito::UserPoolClient
+    Type: 'AWS::Cognito::UserPoolClient'
     Properties:
-      ClientName: !Sub ${AWS::StackName}-storyteller-web
+      AllowedOAuthFlows:
+        - code # Required for ALB authentication
+      AllowedOAuthFlowsUserPoolClient: true # Required for ALB authentication
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+        - aws.cognito.signin.user.admin
+      CallbackURLs:
+        - !Sub https://${WebsiteName}.${DomainName}/oauth2/idpresponse # Redirects to the ALB
       GenerateSecret: true
+      SupportedIdentityProviders: # Optional: add providers for identity federation
+        - COGNITO
       UserPoolId: !Ref UserPool
 
   ## ACM Cert Config Section
