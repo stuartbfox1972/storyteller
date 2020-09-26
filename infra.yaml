@@ -199,7 +199,7 @@ Resources:
       Certificates:
         - CertificateArn: !Ref ALBCertificate
       DefaultActions:
-        - TargetGroupArn: !Ref 'DefaultTargetGroup'
+        - TargetGroupArn: !Ref TargetGroup
           Type: 'forward'
           Order: 1
       #DefaultActions: 
