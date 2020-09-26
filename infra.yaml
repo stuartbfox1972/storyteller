@@ -224,13 +224,12 @@ Resources:
             Scope: openid
             SessionCookieName: AWSELBAuthSessionCookie
             SessionTimeout: 60
-            UserPoolArn: !Ref UserPool
+            UserPoolArn: !GetAtt UserPool.Arn
             UserPoolDomain: !GetAtt UserPool.ProviderURL
             UserPoolClientId: !Ref UserPoolClient
         - Type: forward
           Order: 2
           TargetGroupArn: !Ref TargetGroup
-
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
