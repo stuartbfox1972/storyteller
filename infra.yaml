@@ -209,20 +209,12 @@ Resources:
             Scope: openid
             SessionCookieName: AWSELBAuthSessionCookie
             SessionTimeout: 60
-            UserPoolArn: !Ref CognitoUserpoolArn
-            UserPoolDomain: !Ref CognitoUserpoolDomain
-            UserPoolClientId: !Ref CognitoAppClient
+            UserPoolArn: !Ref UserPool.ProviderURL
+            UserPoolDomain: !GetAtt UserPool
+            UserPoolClientId: !Ref UserPoolClient
         - Type: forward
           Order: 2
           TargetGroupArn: !Ref TargetGroup
-
-  #DefaultTargetGroup:
-  #  Type: AWS::ElasticLoadBalancingV2::TargetGroup
-  #  Properties:
-  #    Name: !Sub "${AWS::StackName}-DefaultTG"
-  #    VpcId: !Ref 'Vpc'
-  #    Port: 80
-  #    Protocol: HTTP
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
