@@ -109,7 +109,6 @@ Resources:
           Action: dynamodb:*
           Resource: 
           - !GetAtt StoriesTable.Arn
-          - !GetAtt SensorDataTable.Arn
       Roles:
         - !Ref ECSTaskRole
 
