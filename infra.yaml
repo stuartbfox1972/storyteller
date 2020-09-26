@@ -217,21 +217,21 @@ Resources:
       #    Order: 2
       #    TargetGroupArn: !Ref TargetGroup
 
-  #TargetGroup:
-  #  Type: AWS::ElasticLoadBalancingV2::TargetGroup
-  #  Properties:
-  #    Name: !Sub "${AWS::StackName}-TG"
-  #    VpcId: !Ref Vpc
-  #    Port: 80
-  #    Protocol: HTTP
-  #    Matcher:
-  #      HttpCode: 200-299
-  #    HealthCheckIntervalSeconds: 60
-  #    HealthCheckPath: /
-  #    HealthCheckProtocol: HTTP
-  #    HealthCheckTimeoutSeconds: 45
-  #    HealthyThresholdCount: 2
-  #    TargetType: ip
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${AWS::StackName}-TG"
+      VpcId: !Ref Vpc
+      Port: 80
+      Protocol: HTTP
+      Matcher:
+        HttpCode: 200-299
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 45
+      HealthyThresholdCount: 2
+      TargetType: ip
 
   #ListenerRule443:
   #  Type: AWS::ElasticLoadBalancingV2::ListenerRule
@@ -356,8 +356,6 @@ Resources:
 
   ECSService:
     Type: 'AWS::ECS::Service'
-    DependsOn:
-      - LoadBalancerListener443
     Properties:
       Cluster: !GetAtt ['ECSCluster', 'Arn']
       ServiceName: !Sub "${AWS::StackName}-ECSService"
