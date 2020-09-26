@@ -1,0 +1,425 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "**WARNING** You will be billed for the AWS resources used if you create a stack from this template"
+
+Metadata:
+  About:
+    Description: "StoryTeller - Infrastructure"
+  Author:
+    Description: "Stuart Fox"
+
+Parameters:
+  UseHostedZone:
+    Type: String
+  HostedZone:
+    Type: String
+  WebsiteName:
+    Type: String
+  DomainName:
+    Type: String
+  Vpc:
+    Type: String
+  PubSubnet1:
+    Type: String
+  PubSubnet2:
+    Type: String
+  PrivSubnet1:
+    Type: String
+  PrivSubnet2:
+    Type: String
+  DockerRepo:
+    Type: String
+  MinContainers:
+    Type: Number
+  MaxContainers:
+    Type: Number
+  AutoScalingTargetValue:
+    Type: Number
+
+Resources:
+# DynamoDB Table
+  StoriesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-data"
+      KeySchema:
+        - AttributeName: "PK"
+          KeyType: "HASH"
+        - AttributeName: "SK"
+          KeyType: "RANGE"
+      AttributeDefinitions:
+        - AttributeName: "PK"
+          AttributeType: "S"
+        - AttributeName: "SK"
+          AttributeType: "S"
+        - AttributeName: "GSIPK1"
+          AttributeType: "S"
+        - AttributeName: "ageRange"
+          AttributeType: "S"
+        - AttributeName: "author"
+          AttributeType: "S"
+      BillingMode: PAY_PER_REQUEST
+      GlobalSecondaryIndexes: 
+        - IndexName: "ListOfStories"
+          KeySchema:
+            - AttributeName: "GSIPK1"
+              KeyType: "HASH"
+          Projection:
+            NonKeyAttributes:
+              - "title"
+              - "tags"
+              - "author"
+              - "ageRange"
+              - "views"
+            ProjectionType: "INCLUDE"
+        - IndexName: "GroupStoriesByAgeRangeIndex"
+          KeySchema:
+            - AttributeName: "ageRange"
+              KeyType: "HASH"
+          Projection:
+            NonKeyAttributes:
+              - "title"
+              - "tags"
+              - "author"
+              - "storyId"
+              - "views"
+            ProjectionType: "INCLUDE"
+        - IndexName: "GroupStoriesByAuthorIndex"
+          KeySchema:
+            - AttributeName: "author"
+              KeyType: "HASH"
+          Projection:
+            NonKeyAttributes:
+              - "title"
+              - "tags"
+              - "ageRange"
+              - "storyId"
+              - "views"
+            ProjectionType: "INCLUDE"
+ 
+  DynamodbTableAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${AWS::StackName}-DynamoAccess"
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action: dynamodb:*
+          Resource: 
+          - !GetAtt StoriesTable.Arn
+          - !GetAtt SensorDataTable.Arn
+      Roles:
+        - !Ref ECSTaskRole
+
+  # Cognito
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${AWS::StackName}-UserPool
+      AliasAttributes:
+        - email
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+      AutoVerifiedAttributes:
+        - email
+      UsernameConfiguration:
+        CaseSensitive: false
+      DeviceConfiguration:
+        ChallengeRequiredOnNewDevice: true
+        DeviceOnlyRememberedOnUserPrompt: true
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+          TemporaryPasswordValidityDays: 1
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${AWS::StackName}-storyteller-web
+      GenerateSecret: false
+      UserPoolId: !Ref UserPool
+
+  ## ACM Cert Config Section
+  ALBCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub '${WebsiteName}.${DomainName}'
+      ValidationMethod: DNS
+
+  ## LoadBalancer (ALB) Config Section
+  ALBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "ALB Security Group"
+      GroupName: !Sub "${AWS::StackName}-ALBSg"
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      type: application
+      Name: !Sub "${AWS::StackName}-ALB"
+      LoadBalancerAttributes:
+        - Key: idle_timeout.timeout_seconds
+          Value: 300
+      Scheme: internet-facing
+      Subnets: 
+        - !Ref PubSubnet1
+        - !Ref PubSubnet2
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+    
+  LoadBalancerListener443:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref 'LoadBalancer'
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Ref ALBCertificate
+      #DefaultActions:
+      #  - TargetGroupArn: !Ref 'DefaultTargetGroup'
+      #    Type: 'forward'
+      DefaultActions: 
+        - Type: authenticate-cognito
+          Order: 1
+          AuthenticateCognitoConfig: 
+            OnUnauthenticatedRequest: authenticate
+            Scope: openid
+            SessionCookieName: AWSELBAuthSessionCookie
+            SessionTimeout: 60
+            UserPoolArn: !Ref CognitoUserpoolArn
+            UserPoolDomain: !Ref CognitoUserpoolDomain
+            UserPoolClientId: !Ref CognitoAppClient
+        - Type: forward
+          Order: 2
+          TargetGroupArn: !Ref TargetGroup
+
+  #DefaultTargetGroup:
+  #  Type: AWS::ElasticLoadBalancingV2::TargetGroup
+  #  Properties:
+  #    Name: !Sub "${AWS::StackName}-DefaultTG"
+  #    VpcId: !Ref 'Vpc'
+  #    Port: 80
+  #    Protocol: HTTP
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${AWS::StackName}-TG"
+      VpcId: !Ref Vpc
+      Port: 80
+      Protocol: HTTP
+      Matcher:
+        HttpCode: 200-299
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 45
+      HealthyThresholdCount: 2
+      TargetType: ip
+
+  ListenerRule443:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      ListenerArn: !Ref LoadBalancerListener443
+      Priority: 1
+      Conditions:
+        - Field: path-pattern
+          Values:
+            - /*
+      Actions:
+        - TargetGroupArn: !Ref TargetGroup
+          Type: forward
+
+  ## Route53 Config Section
+  DNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZone
+      Name: !Join [".", [!Ref WebsiteName, !Ref DomainName]]
+      Type: A
+      AliasTarget:
+        HostedZoneId: !GetAtt LoadBalancer.CanonicalHostedZoneID
+        DNSName: !GetAtt LoadBalancer.DNSName
+
+  ## CloudWatch Config Section
+  CloudWatchLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "${AWS::StackName}-LogGroup"
+      RetentionInDays: 365
+
+  ## S3 Config Section
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+
+  #X-Ray Config Section
+  XRayAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${AWS::StackName}-XRayAccess"
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+            - xray:GetSamplingRules
+            - xray:GetSamplingTargets
+            - xray:PutTraceSegments
+          Resource: 
+          - "*"
+      Roles:
+        - !Ref ECSTaskRole
+
+  ## ECS Config Section
+  ECSTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-ECSTaskRole"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+              - ecs-tasks.amazonaws.com
+        
+  ECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Access to the Fargate containers"
+      GroupName: !Sub "${AWS::StackName}-FargateSG"
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          SourceSecurityGroupId: !Ref 'ALBSecurityGroup'
+
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "${AWS::StackName}-ECSCluster"
+
+  ECSTaskDefinition:
+    DependsOn:
+      - ECSTaskRole
+      - CloudWatchLogsGroup
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      ExecutionRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/ecsTaskExecutionRole"
+      TaskRoleArn: { "Fn::GetAtt": ["ECSTaskRole", "Arn"] }
+      RequiresCompatibilities:
+        - "FARGATE"
+      Family: !Sub "${AWS::StackName}-TaskDef"
+      NetworkMode: "awsvpc"
+      Cpu: 512
+      Memory: 1GB
+      ContainerDefinitions:
+      - Name: !Sub "webapp"
+        Image: !Sub "${DockerRepo}:latest"
+        PortMappings:
+        - ContainerPort: 5000
+          Protocol: tcp
+        EntryPoint: 
+          - "/src/boot.sh"
+        LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref CloudWatchLogsGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: !Sub "${AWS::StackName}-LogStream"
+        Environment:
+          - Name: STORIES_TABLE
+            Value: !Ref StoriesTable"
+          - Name: S3_BUCKET
+            Value: !Ref S3Bucket
+          - Name: STACK_NAME
+            Value: !Sub "${AWS::StackName}"
+          - Name: REGION
+            Value: !Sub "${AWS::Region}"
+
+  ECSService:
+    Type: 'AWS::ECS::Service'
+    DependsOn:
+      - LoadBalancerListener80
+    Properties:
+      Cluster: !GetAtt ['ECSCluster', 'Arn']
+      ServiceName: !Sub "${AWS::StackName}-ECSService"
+      LaunchType: FARGATE
+      TaskDefinition: !Ref ECSTaskDefinition
+      DesiredCount: !Ref MinContainers
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 50
+      HealthCheckGracePeriodSeconds: 10
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          SecurityGroups:
+            - !Ref ECSSecurityGroup
+          Subnets:
+            - !Ref PrivSubnet1
+            - !Ref PrivSubnet2
+      LoadBalancers:
+      - ContainerName: "webapp"
+        ContainerPort: 5000
+        TargetGroupArn: !Ref TargetGroup
+    
+  AutoScalingRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-AutoScalingRole"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole'
+
+  AutoScalingTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MinCapacity: !Ref MinContainers
+      MaxCapacity: !Ref MaxContainers
+      ResourceId: !Join ['/', [service, !Ref 'ECSCluster', !GetAtt ECSService.Name]]
+      ScalableDimension: ecs:service:DesiredCount
+      ServiceNamespace: ecs
+      RoleARN: !GetAtt AutoScalingRole.Arn
+
+  AutoScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: !Sub "${AWS::StackName}-AutoScalingPolicy"
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref AutoScalingTarget
+      TargetTrackingScalingPolicyConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ECSServiceAverageCPUUtilization
+        ScaleInCooldown: 20
+        ScaleOutCooldown: 5
+        TargetValue: !Ref AutoScalingTargetValue

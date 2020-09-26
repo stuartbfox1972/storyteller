@@ -1,0 +1,251 @@
+{
+    "story-teller-dev-data": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"USER#0"},
+                    "SK": {"S":"PROFILE"},
+                    "displayName": {"S":"System"},
+                    "acctStatus": {"S":"locked"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"DETAILS"},
+                    "storyId": {"N": "0"},
+                    "publishDate": {"N":"1600566193"},
+                    "author": {"S":"System"},
+                    "ageRange": {"S":"18+"},
+                    "GSIPK1": {"S": "STORIES"},
+                    "title": {"S":"Live or die?"},
+                    "opening": {"S":"You are standing in a hallway of your grand parents rancher. There is a very spooky atmosphere..."},
+                    "tags": { "SS": ["dark", "horror", "family"]},
+                    "views": {"N":"0"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#1"},
+                    "SK": {"S":"DETAILS"},
+                    "storyId": {"N": "1"},
+                    "publishDate": {"N":"1600569193"},
+                    "author": {"S":"System"},
+                    "ageRange": {"S":"6-8"},
+                    "GSIPK1": {"S": "STORIES"},
+                    "title": {"S":"Left or right?"},
+                    "opening": {"S":"Pooky the catapillar is confused"},
+                    "tags": { "SS": ["funny", "catapillar"]},
+                    "views": {"N":"10"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#2"},
+                    "SK": {"S":"DETAILS"},
+                    "storyId": {"N": "2"},
+                    "publishDate": {"N":"1600569193"},
+                    "author": {"S":"System"},
+                    "ageRange": {"S":"6-8"},
+                    "GSIPK1": {"S": "STORIES"},
+                    "title": {"S":"Up or down?"},
+                    "opening": {"S":"Pooky the catapillar is hungry"},
+                    "tags": { "SS": ["funny", "catapillar", "food"]},
+                    "views": {"N":"10"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"PARAGRAPH#0"},
+                    "body": {"S":"You are standing in a hallway of your grand parents rancher. There is a very spooky atmosphere and you are itching to leave without being seen. You see doors on your left and right. What do you do?"},
+                    "choices": {"M": {"Take the left door": {"S": "1"},"Take the right door": {"S": "2"}}}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"PARAGRAPH#1"},
+                    "body": {"S":"You arrive in an open space, you look around and see an attic door and a trap door. What do you do?"},
+                    "choices": {"M": {"Attic ": {"S": "3"}, "Trap Door": {"S": "4"}, "Go Back": {"S":"0"}}}
+                }
+            }
+        },
+        
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"PARAGRAPH#2"},
+                    "body": {"S":"You are now outside and see a garden shed and a double garage. Where do you go?"},
+                    "choices": {"M": {"Shed ": {"S": "5"}, "Garage": {"S": "6"}, "Go Back": {"S":"0"}}}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"PARAGRAPH#3"},
+                    "body": {"S":"As you enter the attic, your mistake becomes all too real. Your grand parents booby trapped the attic and a large statue falls on your head killing you instantly."},
+                    "end": {"S": "True"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"PARAGRAPH#4"},
+                    "body": {"S":"As you enter the basement through the trap door, your mistake becomes all too real. Your grand parents booby trapped the door and it slams shut above you. There is no way out. You die a slow, thirsty and hungry death."},
+                    "end": {"S": "True"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"PARAGRAPH#5"},
+                    "body": {"S":"As you enter the garden shed, the secret life of your murderous grand parents is revealed to you. You see fresh body parts on the table and your grand father standing over them. The last thing you see is the gun pointing at your face"},
+                    "end": {"S": "True"},
+                    "choices": {"M": {"Exit ": {"S": "100"}}}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"PARAGRAPH#6"},
+                    "body": {"S":"You enter the double garage and notice 2 vehicles; a large old unmarked van and a new looking Mercedes."},
+                    "choices": {"M": {"Enter the Van": {"S": "7"}, "Enter the Mercedes": {"S":"8"}}}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"PARAGRAPH#7"},
+                    "body": {"S":"You climb into the front seat of the van and hunt for the key. You hear a noise behind you and turn around to see you grand mother slashing at your throat. The last thing you see is her sweet smile as you fade away"},
+                    "end": {"S": "True"},
+                    "choices": {"M": {"Exit ": {"S": "100"}}}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"PARAGRAPH#8"},
+                    "body": {"S":"You climb into the front seat of the Mercedes and hunt for the key. You hear a noise behind you and turn around to see you grand mother, covered in blood and carrying a wicked looking kitchen knife, climbing out of the var. You fumble the key into the iginition and the car roars into life. You slam it into drive and take off out of the open garage door to your freedom!"},
+                    "end": {"S": "True"},
+                    "choices": {"M": {"Exit ": {"S": "101"}}}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"PARAGRAPH#100"},
+                    "body": {"S":"Your spooky adventure has come to a sticky end, have became your grand parents 41st victim. Can anybody escape them?"},
+                    "end": {"S": "True"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"PARAGRAPH#101"},
+                    "body": {"S":"Congratulations in escaping your grand parents evil lair, you narrowly avoided becoming your grand parents 41st victim. Can anybody stop them?"},
+                    "end": {"S": "True"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"REVIEW#0"},
+                    "body": {"S":"A masterpiece of literature"},
+                    "rating": {"N": "5.0"},
+                    "displayName":{"S":"Bob"},
+                    "publishDate": {"N":"1600566193"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"REVIEW#1"},
+                    "body": {"S":"A disaster of literature"},
+                    "rating": {"N": "0.0"},
+                    "displayName":{"S":"Alice"},
+                    "publishDate": {"N":"1600569193"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"REVIEW#2"},
+                    "body": {"S":"A piece of literature"},
+                    "rating": {"N": "2.5"},
+                    "displayName":{"S":"Jane"},
+                    "publishDate": {"N":"1600570193"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"REVIEW#3"},
+                    "body": {"S":"It's a story"},
+                    "rating": {"N": "1.0"},
+                    "displayName":{"S":"Rod"},
+                    "publishDate": {"N":"1600581193"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"REVIEW#4"},
+                    "body": {"S":"It's a short story"},
+                    "rating": {"N": "4.0"},
+                    "displayName":{"S":"Freddie"},
+                    "publishDate": {"N":"1600591193"}
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "PK": {"S":"STORY#0"},
+                    "SK": {"S":"TAGS"},
+                    "tags": {"SS":["dark", "horror", "family"]},
+                    "rating": {"N": "4.0"},
+                    "displayName":{"S":"Freddie"},
+                    "publishDate": {"N":"1600591193"}
+                }
+            }
+        }
+    ]
+}
