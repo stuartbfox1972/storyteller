@@ -144,6 +144,12 @@ Resources:
           RequireUppercase: true
           TemporaryPasswordValidityDays: 1
 
+  UserPoolDomain:
+    Type: 'AWS::Cognito::UserPoolDomain'
+    Properties:
+      UserPoolId: !Ref UserPool
+      Domain: !Select [2, !Split ['/', !Ref 'AWS::StackId']]
+
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
