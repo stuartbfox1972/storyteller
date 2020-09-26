@@ -353,7 +353,7 @@ Resources:
               awslogs-stream-prefix: !Sub "${AWS::StackName}-LogStream"
         Environment:
           - Name: STORIES_TABLE
-            Value: !Ref StoriesTable"
+            Value: !Ref StoriesTable
           - Name: S3_BUCKET
             Value: !Ref S3Bucket
           - Name: STACK_NAME
