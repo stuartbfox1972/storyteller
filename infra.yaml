@@ -229,7 +229,15 @@ Resources:
             UserPoolClientId: !Ref UserPoolClient
         - Type: forward
           Order: 2
-          TargetGroupArn: !Ref TargetGroup
+          TargetGroupArn: !Ref DefaultTargetGroup
+
+  DefaultTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${AWS::StackName}-DefaultTG"
+      VpcId: !Ref 'Vpc'
+      Port: 80
+      Protocol: HTTP
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
