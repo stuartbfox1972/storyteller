@@ -364,7 +364,7 @@ Resources:
   ECSService:
     Type: 'AWS::ECS::Service'
     DependsOn:
-      - LoadBalancerListener80
+      - LoadBalancerListener443
     Properties:
       Cluster: !GetAtt ['ECSCluster', 'Arn']
       ServiceName: !Sub "${AWS::StackName}-ECSService"
