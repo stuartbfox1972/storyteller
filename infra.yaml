@@ -178,7 +178,7 @@ Resources:
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      type: application
+      Type: application
       Name: !Sub "${AWS::StackName}-ALB"
       LoadBalancerAttributes:
         - Key: idle_timeout.timeout_seconds
