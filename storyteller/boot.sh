@@ -7,8 +7,8 @@ ls -lh /usr/bin/xray
 
 # Start gunicorn listening on all interfaces
 exec gunicorn --chdir app storyteller:app \
-              --workers 4 \
-              --threads 8 \
+              --workers 2 \
+              --threads 4 \
               --access-logfile - \
               --error-logfile - \
               --timeout 300 \
