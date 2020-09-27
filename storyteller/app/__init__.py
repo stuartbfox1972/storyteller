@@ -10,7 +10,7 @@ patcher.patch(('requests',))
 app = Flask(__name__)
 
 # Configure the X-Ray recorder to generate segments with our service name
-xray_recorder.configure(service='CacheDemo')
+xray_recorder.configure(service='StoryTeller')
 
 # Instrument the Flask application
 XRayMiddleware(app, xray_recorder)
