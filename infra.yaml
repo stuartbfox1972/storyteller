@@ -345,7 +345,7 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: !Sub "${AWS::StackName}-infra-ECSCluster"
+      ClusterName: !Sub "${AWS::StackName}-ECSCluster"
 
   ECSTaskDefinition:
     DependsOn:

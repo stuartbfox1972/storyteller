@@ -332,8 +332,8 @@ Resources:
               InputArtifacts:
                 - Name: BO
               Configuration:
-                ClusterName: !Sub "${AWS::StackName}-ECSCluster"
-                ServiceName: !Sub "${AWS::StackName}-ECSService"
+                ClusterName: !Sub "${AWS::StackName}-infra-ECSCluster"
+                ServiceName: !Sub "${AWS::StackName}-infra-ECSService"
                 FileName: "imagedefinitions.json"
               RunOrder: 4
 
