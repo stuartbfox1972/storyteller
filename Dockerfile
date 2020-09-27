@@ -13,7 +13,7 @@ RUN \
   pip install --no-compile --no-cache-dir -r /src/requirements.txt && \
   chmod +x /src/boot.sh && \
   adduser -D flask && \
-  chown -R flask:flask /src/*
+  chown -R flask:flask /src/* /usr/bin/xray
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED TRUE
