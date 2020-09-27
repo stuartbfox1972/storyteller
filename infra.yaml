@@ -251,16 +251,13 @@ Resources:
       - TargetGroup
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-      LoadBalancerArn: !Ref 'LoadBalancer'
-      Port: 443
-      Protocol: HTTPS
       Certificates:
-        - CertificateArn: !Ref ALBCertificate
+        - CertificateArn: !Ref ALBCertificate      
       DefaultActions: 
-        - Type: authenticate-cognito
-          Order: 1
-          AuthenticateCognitoConfig: 
-            OnUnauthenticatedRequest: authenticate
+      - Type: authenticate-cognito
+        Order: 1
+        AuthenticateCognitoConfig: 
+          OnUnauthenticatedRequest: authenticate
             Scope: openid
             SessionCookieName: AWSELBAuthSessionCookie
             SessionTimeout: 60
@@ -270,6 +267,9 @@ Resources:
         - Type: forward
           Order: 2
           TargetGroupArn: !Ref TargetGroup
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 443
+      Protocol: HTTPS
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
