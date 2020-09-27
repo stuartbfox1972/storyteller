@@ -168,16 +168,16 @@ Resources:
     #       TemporaryPasswordValidityDays: 1
 
   UserPoolDomain:
-    Type: 'AWS::Cognito::UserPoolDomain'
+    Type: AWS::Cognito::UserPoolDomain
     Properties:
       UserPoolId: !Ref UserPool
-      Domain: !Select [2, !Split ['/', !Ref 'AWS::StackId']]
+      Domain: !Ref WebsiteName
 
   UserPoolClient:
-    Type: 'AWS::Cognito::UserPoolClient'
+    Type: AWS::Cognito::UserPoolClient
     Properties:
       AllowedOAuthFlows:
-        - code # Required for ALB authentication
+      - code # Required for ALB authentication
       AllowedOAuthFlowsUserPoolClient: true # Required for ALB authentication
       AllowedOAuthScopes:
         - email
@@ -252,21 +252,21 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
       Certificates:
-        - CertificateArn: !Ref ALBCertificate      
+      - CertificateArn: !Ref ALBCertificate      
       DefaultActions: 
       - Type: authenticate-cognito
         Order: 1
         AuthenticateCognitoConfig: 
           OnUnauthenticatedRequest: authenticate
-            Scope: openid
-            SessionCookieName: AWSELBAuthSessionCookie
-            SessionTimeout: 60
-            UserPoolArn: !GetAtt UserPool.Arn
-            UserPoolDomain: !Ref UserPoolDomain
-            UserPoolClientId: !Ref UserPoolClient
-        - Type: forward
-          Order: 2
-          TargetGroupArn: !Ref TargetGroup
+          Scope: openid
+          SessionCookieName: AWSELBAuthSessionCookie
+          SessionTimeout: 60
+          UserPoolArn: !GetAtt UserPool.Arn
+          UserPoolDomain: !Ref UserPoolDomain
+          UserPoolClientId: !Ref UserPoolClient
+      - Type: forward
+        Order: 2
+        TargetGroupArn: !Ref TargetGroup
       LoadBalancerArn: !Ref LoadBalancer
       Port: 443
       Protocol: HTTPS
@@ -278,11 +278,12 @@ Resources:
       VpcId: !Ref Vpc
       Port: 80
       Protocol: HTTP
-      Matcher:
-        HttpCode: 200-299
-      HealthCheckIntervalSeconds: 60
-      HealthCheckPath: /
-      HealthCheckProtocol: HTTP
+      TargetType: ip
+      #Matcher:
+      #  HttpCode: 200-299
+      #HealthCheckIntervalSeconds: 60
+      #HealthCheckPath: /
+      #HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 45
       HealthyThresholdCount: 2
       TargetType: ip
@@ -329,7 +330,7 @@ Resources:
     Properties:
       PolicyName: !Sub "${AWS::StackName}-XRayAccess"
       PolicyDocument:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Statement:
         - Effect: Allow
           Action:
@@ -363,7 +364,7 @@ Resources:
       VpcId: !Ref Vpc
       SecurityGroupIngress:
         - IpProtocol: -1
-          SourceSecurityGroupId: !Ref 'ALBSecurityGroup'
+          SourceSecurityGroupId: !Ref ALBSecurityGroup
 
   ECSCluster:
     Type: AWS::ECS::Cluster
@@ -374,7 +375,7 @@ Resources:
     DependsOn:
       - ECSTaskRole
       - CloudWatchLogsGroup
-    Type: 'AWS::ECS::TaskDefinition'
+    Type: AWS::ECS::TaskDefinition
     Properties:
       ExecutionRoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/ecsTaskExecutionRole"
       TaskRoleArn: { "Fn::GetAtt": ["ECSTaskRole", "Arn"] }
@@ -409,11 +410,11 @@ Resources:
             Value: !Sub "${AWS::Region}"
 
   ECSService:
-    Type: 'AWS::ECS::Service'
+    Type: AWS::ECS::Service
     DependsOn:
       - LoadBalancerListener443
     Properties:
-      Cluster: !GetAtt ['ECSCluster', 'Arn']
+      Cluster: !GetAtt ["ECSCluster", "Arn"]
       ServiceName: !Sub "${AWS::StackName}-ECSService"
       LaunchType: FARGATE
       TaskDefinition: !Ref ECSTaskDefinition
@@ -443,16 +444,16 @@ Resources:
           - Effect: Allow
             Principal:
               Service: ecs-tasks.amazonaws.com
-            Action: 'sts:AssumeRole'
+            Action: "sts:AssumeRole"
       ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole'
+        - "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole"
 
   AutoScalingTarget:
     Type: AWS::ApplicationAutoScaling::ScalableTarget
     Properties:
       MinCapacity: !Ref MinContainers
       MaxCapacity: !Ref MaxContainers
-      ResourceId: !Join ['/', [service, !Ref 'ECSCluster', !GetAtt ECSService.Name]]
+      ResourceId: !Join ["/", [service, !Ref "ECSCluster", !GetAtt ECSService.Name]]
       ScalableDimension: ecs:service:DesiredCount
       ServiceNamespace: ecs
       RoleARN: !GetAtt AutoScalingRole.Arn
