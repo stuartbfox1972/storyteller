@@ -1,6 +1,6 @@
 {
   "resource": "/story/{id}",
-  "path": "/story/0c0eac50-3954-4f54-8f32-5c3121b99fe9",
+  "path": "/story/0",
   "httpMethod": "GET",
   "headers": null,
   "multiValueHeaders": null,

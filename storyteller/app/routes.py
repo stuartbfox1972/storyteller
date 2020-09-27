@@ -12,7 +12,8 @@ def apply_headers(response):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    print request.__dict__
+    #return render_template('index.html')
 
 
 @app.route('/stories', methods=['GET'])
