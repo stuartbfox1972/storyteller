@@ -345,7 +345,7 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: !Sub "${AWS::StackName}-ECSCluster"
+      ClusterName: !Sub "${AWS::StackName}-infra-ECSCluster"
 
   ECSTaskDefinition:
     DependsOn:
@@ -391,7 +391,7 @@ Resources:
       - LoadBalancerListener443
     Properties:
       Cluster: !GetAtt ['ECSCluster', 'Arn']
-      ServiceName: !Sub "${AWS::StackName}infra-ECSService"
+      ServiceName: !Sub "${AWS::StackName}-ECSService"
       LaunchType: FARGATE
       TaskDefinition: !Ref ECSTaskDefinition
       DesiredCount: !Ref MinContainers
