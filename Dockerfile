@@ -13,6 +13,7 @@ RUN \
   adduser -D flask && \
   chown -R flask:flask /src/* /usr/bin/xray && \
   chmod -v 0777 /usr/bin/xray && \
+  apk add --no-cache libc6-compat && \
   ls -l /usr/bin/xray 
 
 ENV PYTHONDONTWRITEBYTECODE 1
