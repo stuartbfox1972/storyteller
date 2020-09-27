@@ -113,59 +113,59 @@ Resources:
         - !Ref ECSTaskRole
 
   # Cognito
+  # UserPool:
+  #   Type: 'AWS::Cognito::UserPool'
+  #   Properties:
+  #     UserPoolName: !Sub ${AWS::StackName}-UserPool
+  #     AdminCreateUserConfig:
+  #       AllowAdminCreateUserOnly: true # Disable self-registration
+  #       InviteMessageTemplate:
+  #         EmailSubject: !Sub '${AWS::StackName}: temporary password'
+  #         EmailMessage: 'Use the username {username} and the temporary password {####} to log in for the first time.'
+  #         SMSMessage: 'Use the username {username} and the temporary password {####} to log in for the first time.'
+  #     AutoVerifiedAttributes:
+  #     - email
+  #     UsernameAttributes:
+  #     - email
+  #     Policies:
+  #       PasswordPolicy:
+  #         MinimumLength: 16
+  #         RequireLowercase: false
+  #         RequireNumbers: false
+  #         RequireSymbols: false
+  #         RequireUppercase: false
+  #         TemporaryPasswordValidityDays: 21
+
   UserPool:
-    Type: 'AWS::Cognito::UserPool'
+    Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: !Sub ${AWS::StackName}-UserPool
-      AdminCreateUserConfig:
-        AllowAdminCreateUserOnly: true # Disable self-registration
-        InviteMessageTemplate:
-          EmailSubject: !Sub '${AWS::StackName}: temporary password'
-          EmailMessage: 'Use the username {username} and the temporary password {####} to log in for the first time.'
-          SMSMessage: 'Use the username {username} and the temporary password {####} to log in for the first time.'
+      AliasAttributes:
+        - email
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
       AutoVerifiedAttributes:
-      - email
-      UsernameAttributes:
-      - email
+        - email
+      UsernameConfiguration:
+        CaseSensitive: false
+      DeviceConfiguration:
+        ChallengeRequiredOnNewDevice: true
+        DeviceOnlyRememberedOnUserPrompt: true
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
       Policies:
         PasswordPolicy:
-          MinimumLength: 16
-          RequireLowercase: false
-          RequireNumbers: false
-          RequireSymbols: false
-          RequireUppercase: false
-          TemporaryPasswordValidityDays: 21
-
-  #UserPool:
-  #  Type: AWS::Cognito::UserPool
-    # Properties:
-    #   UserPoolName: !Sub ${AWS::StackName}-UserPool
-    #   AliasAttributes:
-    #     - email
-    #   Schema:
-    #     - Name: email
-    #       AttributeDataType: String
-    #       Mutable: false
-    #       Required: true
-    #   AutoVerifiedAttributes:
-    #     - email
-    #   UsernameConfiguration:
-    #     CaseSensitive: false
-    #   DeviceConfiguration:
-    #     ChallengeRequiredOnNewDevice: true
-    #     DeviceOnlyRememberedOnUserPrompt: true
-    #   AccountRecoverySetting:
-    #     RecoveryMechanisms:
-    #       - Name: verified_email
-    #         Priority: 1
-    #   Policies:
-    #     PasswordPolicy:
-    #       MinimumLength: 12
-    #       RequireLowercase: true
-    #       RequireNumbers: true
-    #       RequireSymbols: true
-    #       RequireUppercase: true
-    #       TemporaryPasswordValidityDays: 1
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+          TemporaryPasswordValidityDays: 1
 
   UserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
@@ -254,39 +254,11 @@ Resources:
       Certificates:
       - CertificateArn: !Ref ALBCertificate      
       DefaultActions: 
-      - Type: authenticate-cognito
-        Order: 1
-        AuthenticateCognitoConfig: 
-          OnUnauthenticatedRequest: authenticate
-          Scope: openid
-          SessionCookieName: AWSELBAuthSessionCookie
-          SessionTimeout: 60
-          UserPoolArn: !GetAtt UserPool.Arn
-          UserPoolDomain: !Ref UserPoolDomain
-          UserPoolClientId: !Ref UserPoolClient
       - Type: forward
-        Order: 2
         TargetGroupArn: !Ref TargetGroup
       LoadBalancerArn: !Ref LoadBalancer
       Port: 443
       Protocol: HTTPS
-
-  TargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: !Sub "${AWS::StackName}-TG"
-      VpcId: !Ref Vpc
-      Port: 80
-      Protocol: HTTP
-      TargetType: ip
-      Matcher:
-        HttpCode: 200-299
-      HealthCheckIntervalSeconds: 60
-      HealthCheckPath: /
-      HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 45
-      HealthyThresholdCount: 2
-      TargetType: ip
 
   ListenerRule443:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
@@ -296,10 +268,37 @@ Resources:
       Conditions:
         - Field: path-pattern
           Values:
-            - /*
+            - /api*
       Actions:
-        - TargetGroupArn: !Ref TargetGroup
-          Type: forward
+        - Type: authenticate-cognito
+          Order: 1
+          AuthenticateCognitoConfig: 
+            OnUnauthenticatedRequest: authenticate
+            Scope: openid
+            SessionCookieName: AWSELBAuthSessionCookie
+            SessionTimeout: 60
+            UserPoolArn: !GetAtt UserPool.Arn
+            UserPoolDomain: !Ref UserPoolDomain
+            UserPoolClientId: !Ref UserPoolClient
+        - Type: forward
+          Order: 2
+          TargetGroupArn: !Ref TargetGroup
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub "${AWS::StackName}-TG"
+      VpcId: !Ref Vpc
+      Port: 80
+      Protocol: HTTP
+      Matcher:
+        HttpCode: 200-299
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 45
+      HealthyThresholdCount: 2
+      TargetType: ip
 
   ## Route53 Config Section
   DNSRecord:
@@ -414,7 +413,7 @@ Resources:
     DependsOn:
       - LoadBalancerListener443
     Properties:
-      Cluster: !GetAtt ["ECSCluster", "Arn"]
+      Cluster: !GetAtt ECSCluster.Arn
       ServiceName: !Sub "${AWS::StackName}-ECSService"
       LaunchType: FARGATE
       TaskDefinition: !Ref ECSTaskDefinition
