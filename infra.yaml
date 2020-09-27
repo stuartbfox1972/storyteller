@@ -114,35 +114,57 @@ Resources:
 
   # Cognito
   UserPool:
-    Type: AWS::Cognito::UserPool
+    Type: 'AWS::Cognito::UserPool'
     Properties:
-      UserPoolName: !Sub ${AWS::StackName}-UserPool
-      AliasAttributes:
-        - email
-      Schema:
-        - Name: email
-          AttributeDataType: String
-          Mutable: false
-          Required: true
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true # Disable self-registration
+        InviteMessageTemplate:
+          EmailSubject: !Sub '${AWS::StackName}: temporary password'
+          EmailMessage: 'Use the username {username} and the temporary password {####} to log in for the first time.'
+          SMSMessage: 'Use the username {username} and the temporary password {####} to log in for the first time.'
       AutoVerifiedAttributes:
-        - email
-      UsernameConfiguration:
-        CaseSensitive: false
-      DeviceConfiguration:
-        ChallengeRequiredOnNewDevice: true
-        DeviceOnlyRememberedOnUserPrompt: true
-      AccountRecoverySetting:
-        RecoveryMechanisms:
-          - Name: verified_email
-            Priority: 1
+      - email
+      UsernameAttributes:
+      - email
       Policies:
         PasswordPolicy:
-          MinimumLength: 12
-          RequireLowercase: true
-          RequireNumbers: true
-          RequireSymbols: true
-          RequireUppercase: true
-          TemporaryPasswordValidityDays: 1
+          MinimumLength: 16
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+          TemporaryPasswordValidityDays: 21
+
+  #UserPool:
+  #  Type: AWS::Cognito::UserPool
+    # Properties:
+    #   UserPoolName: !Sub ${AWS::StackName}-UserPool
+    #   AliasAttributes:
+    #     - email
+    #   Schema:
+    #     - Name: email
+    #       AttributeDataType: String
+    #       Mutable: false
+    #       Required: true
+    #   AutoVerifiedAttributes:
+    #     - email
+    #   UsernameConfiguration:
+    #     CaseSensitive: false
+    #   DeviceConfiguration:
+    #     ChallengeRequiredOnNewDevice: true
+    #     DeviceOnlyRememberedOnUserPrompt: true
+    #   AccountRecoverySetting:
+    #     RecoveryMechanisms:
+    #       - Name: verified_email
+    #         Priority: 1
+    #   Policies:
+    #     PasswordPolicy:
+    #       MinimumLength: 12
+    #       RequireLowercase: true
+    #       RequireNumbers: true
+    #       RequireSymbols: true
+    #       RequireUppercase: true
+    #       TemporaryPasswordValidityDays: 1
 
   UserPoolDomain:
     Type: 'AWS::Cognito::UserPoolDomain'
