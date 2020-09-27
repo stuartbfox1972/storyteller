@@ -7,8 +7,8 @@ from boto3.dynamodb.conditions import Key, Attr
 def lambda_handler(event, context):
   if event['resource'] == '/story':
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
-    table = dynamodb.Table('ag-stories')
-    response = table.scan()
+    table = dynamodb.Table('story-teller-dev-data')
+    response = table.()
     for i in response['Items']:
       print(json.dumps(i))
   elif event['resource'] == '/story/{id}':
