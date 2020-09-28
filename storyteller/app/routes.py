@@ -13,14 +13,13 @@ def apply_headers(response):
 
 
 @app.route('/')
-def debug():
-    str = pprint.pformat(request.environ, depth=5)
+def index():
     return render_template('index.html')
 
 @app.route('/debug')
-def index():
-    str = pprint.pformat(request.environ, depth=5)
-    return Response(str, mimetype="text/text")
+def debug():
+    str = pprint.pformat(request.headers, depth=5)
+    return Response(str, mimetype="text/html")
 
 
 @app.route('/stories', methods=['GET'])
