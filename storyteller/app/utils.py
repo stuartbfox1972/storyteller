@@ -39,7 +39,6 @@ def _decode_token():
     decoded_jwt_headers = decoded_jwt_headers.decode("utf-8")
     decoded_json = json.loads(decoded_jwt_headers)
     kid = decoded_json['kid']
-    alg = decoded_json['alg']
 
     # Step 2: Get the public key from regional endpoint
     url = 'https://public-keys.auth.elb.' + secrets['region'] + '.amazonaws.com/' + kid
@@ -47,5 +46,5 @@ def _decode_token():
     pub_key = req.text
 
     # Step 3: Get the payload
-    payload = jwt.decode(encoded_jwt, pub_key, algorithms=[alg, "HS256"])
+    payload = jwt.decode(encoded_jwt, pub_key, algorithms=["HS256"])
     return payload

@@ -18,6 +18,10 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/health')
+def health():
+    return Response("OK", mimetype='text/html')
+
 @app.route('/api/v1.0', methods=['GET'])
 def api():
     #payload = request.headers
