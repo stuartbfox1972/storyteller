@@ -1,6 +1,8 @@
 from app import app
-from flask import render_template, Response
+from app.stories import _list_stories
+from flask import request, render_template, Response
 
+import pprint
 
 @app.after_request
 def apply_headers(response):
@@ -11,12 +13,17 @@ def apply_headers(response):
 
 
 @app.route('/')
+def debug():
+    str = pprint.pformat(request.environ, depth=5)
+    return render_template('index.html')
+
+@app.route('/debug')
 def index():
-    print request.__dict__
-    #return render_template('index.html')
+    str = pprint.pformat(request.environ, depth=5)
+    return Response(str, mimetype="text/text")
 
 
 @app.route('/stories', methods=['GET'])
 def get_stories():
-    payload = _elasticache_flush()
+    payload = _list_stories()
     return Response(payload, mimetype='application/json')

@@ -38,6 +38,34 @@ Parameters:
     Type: Number
 
 Resources:
+# IDP Secrets
+  IDPSecret:
+    DependsOn:
+      - UserPool
+    Type: 'AWS::SecretsManager::Secret'
+    Properties:
+      Name: !Sub /${AWS::StackName}/cognito/IDPSecret
+      SecretString: !Sub |
+       {
+         'app_client_id":"${UserPoolClient}",
+         'userpool_id':"${UserPool}",
+         'keys_url':"https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}/.well-known/jwks.json"
+       }
+
+  SecretsManagerAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${AWS::StackName}-SMAccess"
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action: secretsmanager:GetSecretValue
+          Resource:
+          - !Ref IDPSecret
+      Roles:
+        - !Ref ECSTaskRole
+
 # DynamoDB Table
   StoriesTable:
     Type: AWS::DynamoDB::Table
@@ -113,29 +141,6 @@ Resources:
         - !Ref ECSTaskRole
 
   # Cognito
-  # UserPool:
-  #   Type: 'AWS::Cognito::UserPool'
-  #   Properties:
-  #     UserPoolName: !Sub ${AWS::StackName}-UserPool
-  #     AdminCreateUserConfig:
-  #       AllowAdminCreateUserOnly: true # Disable self-registration
-  #       InviteMessageTemplate:
-  #         EmailSubject: !Sub '${AWS::StackName}: temporary password'
-  #         EmailMessage: 'Use the username {username} and the temporary password {####} to log in for the first time.'
-  #         SMSMessage: 'Use the username {username} and the temporary password {####} to log in for the first time.'
-  #     AutoVerifiedAttributes:
-  #     - email
-  #     UsernameAttributes:
-  #     - email
-  #     Policies:
-  #       PasswordPolicy:
-  #         MinimumLength: 16
-  #         RequireLowercase: false
-  #         RequireNumbers: false
-  #         RequireSymbols: false
-  #         RequireUppercase: false
-  #         TemporaryPasswordValidityDays: 21
-
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
@@ -280,6 +285,9 @@ Resources:
             UserPoolArn: !GetAtt UserPool.Arn
             UserPoolDomain: !Ref UserPoolDomain
             UserPoolClientId: !Ref UserPoolClient
+        - Type: forward
+          Order: 2
+          TargetGroupArn: !Ref TargetGroup
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -404,6 +412,8 @@ Resources:
             Value: !Sub "${AWS::StackName}"
           - Name: REGION
             Value: !Sub "${AWS::Region}"
+          - Name: SECRETS_MANAGER_PATH
+            Value: !Sub "/${AWS::StackName}/cognito/IDPSecret"
 
   ECSService:
     Type: AWS::ECS::Service

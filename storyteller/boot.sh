@@ -2,7 +2,6 @@
 
 HOME="/src"
 
-ls -lh /usr/bin/xray
 /usr/bin/xray -o --bind=0.0.0.0:2000 &
 
 # Start gunicorn listening on all interfaces
@@ -12,4 +11,5 @@ exec gunicorn --chdir app storyteller:app \
               --access-logfile - \
               --error-logfile - \
               --timeout 300 \
+              --reload \
               --bind 0.0.0.0:5000
