@@ -17,21 +17,14 @@ def apply_headers(response):
 def index():
     return render_template('index.html')
 
-@app.route('/debug')
-def debug():
-    str = pprint.pformat(request.headers, depth=5)
-    secrets=_get_secret()
-    str = secrets
-    return Response(str, mimetype="text/html")
+
+@app.route('/api/v1.0', methods=['GET'])
+def api():
+    payload = _decode_token()
+    return Response(str(payload), mimetype='application/json')
 
 
-@app.route('/stories', methods=['GET'])
+@app.route('/api/v1.0/stories', methods=['GET'])
 def get_stories():
     payload = _list_stories()
     return Response(payload, mimetype='application/json')
-
-
-@app.route('/api', methods=['GET'])
-def api():
-    payload = request.headers
-    return Response(str(payload), mimetype='application/json')
