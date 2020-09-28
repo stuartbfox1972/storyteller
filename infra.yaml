@@ -272,14 +272,14 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::ListenerRule
     Properties:
       ListenerArn: !Ref LoadBalancerListener443
-      Priority: 1
+      Priority: 20
       Conditions:
         - Field: path-pattern
           Values:
-            - /api*
+            - "/api/*"
       Actions:
         - Type: authenticate-cognito
-          Order: 1
+          Order: 100
           AuthenticateCognitoConfig: 
             OnUnauthenticatedRequest: authenticate
             Scope: openid
@@ -289,7 +289,7 @@ Resources:
             UserPoolDomain: !Ref UserPoolDomain
             UserPoolClientId: !Ref UserPoolClient
         - Type: forward
-          Order: 2
+          Order: 200
           TargetGroupArn: !Ref TargetGroup
 
   TargetGroup:
