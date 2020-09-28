@@ -47,5 +47,5 @@ def _decode_token():
     pub_key = req.text
 
     # Step 3: Get the payload
-    payload = jwt.decode(encoded_jwt, pub_key, algorithms=alg)
+    payload = jwt.decode(encoded_jwt, pub_key, algorithms=[alg, "HS256"])
     return payload
