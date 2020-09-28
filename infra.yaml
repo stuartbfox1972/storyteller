@@ -307,6 +307,9 @@ Resources:
       HealthCheckTimeoutSeconds: 45
       HealthyThresholdCount: 2
       TargetType: ip
+      TargetGroupAttributes:
+      - Key: deregistration_delay.timeout_seconds
+        Value: 5
 
   ## Route53 Config Section
   DNSRecord:
@@ -390,8 +393,8 @@ Resources:
         - "FARGATE"
       Family: !Sub "${AWS::StackName}-TaskDef"
       NetworkMode: "awsvpc"
-      Cpu: 512
-      Memory: 1GB
+      Cpu: 2048
+      Memory: 4GB
       ContainerDefinitions:
       - Name: !Sub "webapp"
         Image: !Sub "${DockerRepo}:latest"
