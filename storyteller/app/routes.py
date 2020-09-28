@@ -29,3 +29,9 @@ def debug():
 def get_stories():
     payload = _list_stories()
     return Response(payload, mimetype='application/json')
+
+
+@app.route('/api', methods=['GET'])
+def api():
+    payload = request.headers
+    return Response(str(payload), mimetype='application/json')
