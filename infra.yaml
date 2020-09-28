@@ -49,7 +49,10 @@ Resources:
        {
          'app_client_id":"${UserPoolClient}",
          'userpool_id':"${UserPool}",
-         'keys_url':"https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}/.well-known/jwks.json"
+         'keys_url':"https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}/.well-known/jwks.json",
+         'region':"${AWS::Region}",
+         'stories_table':"${StoriesTable}",
+         's3bucket':"${S3Bucket}"
        }
 
   SecretsManagerAccessPolicy:
@@ -404,14 +407,6 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: !Sub "${AWS::StackName}-LogStream"
         Environment:
-          - Name: STORIES_TABLE
-            Value: !Ref StoriesTable
-          - Name: S3_BUCKET
-            Value: !Ref S3Bucket
-          - Name: STACK_NAME
-            Value: !Sub "${AWS::StackName}"
-          - Name: REGION
-            Value: !Sub "${AWS::Region}"
           - Name: SECRETS_MANAGER_PATH
             Value: !Sub "/${AWS::StackName}/cognito/IDPSecret"
 
