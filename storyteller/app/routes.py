@@ -1,5 +1,6 @@
 from app import app
 from app.stories import _list_stories
+from app.utils import _get_secret, _decode_token
 from flask import request, render_template, Response
 
 import pprint
@@ -19,6 +20,8 @@ def index():
 @app.route('/debug')
 def debug():
     str = pprint.pformat(request.headers, depth=5)
+    secrets=_get_secret()
+    str = secrets
     return Response(str, mimetype="text/html")
 
 

@@ -47,12 +47,12 @@ Resources:
       Name: !Sub /${AWS::StackName}/cognito/IDPSecret
       SecretString: !Sub |
        {
-         'app_client_id":"${UserPoolClient}",
-         'userpool_id':"${UserPool}",
-         'keys_url':"https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}/.well-known/jwks.json",
-         'region':"${AWS::Region}",
-         'stories_table':"${StoriesTable}",
-         's3bucket':"${S3Bucket}"
+         "app_client_id":"${UserPoolClient}",
+         "userpool_id":"${UserPool}",
+         "keys_url":"https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}/.well-known/jwks.json",
+         "region":"${AWS::Region}",
+         "stories_table":"${StoriesTable}",
+         "s3bucket":"${S3Bucket}"
        }
 
   SecretsManagerAccessPolicy:

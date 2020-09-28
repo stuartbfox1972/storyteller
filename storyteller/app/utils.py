@@ -1,8 +1,29 @@
 import boto3
 import json
-import pyjwt
+import jwt
 import os
 
 def _get_secret():
     if os.environ['SECRETS_MANAGER_PATH']:
-        return
+        secret_path = os.environ["SECRETS_MANAGER_PATH"]
+        region_name = os.environ["AWS_DEFAULT_REGION"]
+
+        # Create a Secrets Manager client
+        sm_session = boto3.session.Session()
+        sm_client = sm_session.client(
+            service_name='secretsmanager',
+            region_name=region_name
+        )
+
+        try:
+            get_secret_value_response = sm_client.get_secret_value(
+                SecretId=secret_path
+            )
+        except ClientError as e:
+            raise e
+        else:
+            secret = json.loads(get_secret_value_response['SecretString'])
+            return (secret)
+
+def _decode_token():
+    return
