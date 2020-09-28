@@ -33,7 +33,7 @@ def _decode_token():
 
     # Step 1: Get the key id from JWT headers (the kid field)
     secrets=_get_secret()
-    encoded_jwt = request.headers['x-amzn-oidc-data']
+    encoded_jwt = request.headers['X-Amzn-Oidc-Data']
     jwt_headers = encoded_jwt.split('.')[0]
     decoded_jwt_headers = base64.b64decode(jwt_headers)
     decoded_jwt_headers = decoded_jwt_headers.decode("utf-8")

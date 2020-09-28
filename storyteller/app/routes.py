@@ -20,8 +20,8 @@ def index():
 
 @app.route('/api/v1.0', methods=['GET'])
 def api():
-    payload = request.headers
-    #payload = _decode_token()
+    #payload = request.headers
+    payload = _decode_token()
     return Response(str(payload), mimetype='application/json')
 
 
