@@ -421,6 +421,7 @@ Resources:
       Cluster: !GetAtt ECSCluster.Arn
       ServiceName: !Sub "${AWS::StackName}-ECSService"
       LaunchType: FARGATE
+      PlatformVersion: 1.4.0
       TaskDefinition: !Ref ECSTaskDefinition
       DesiredCount: !Ref MinContainers
       DeploymentConfiguration:
