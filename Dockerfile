@@ -13,7 +13,7 @@ RUN \
   adduser -D flask && \
   chown -R flask:flask /src/* /usr/bin/xray && \
   chmod -v 0777 /usr/bin/xray && \
-  apk add --no-cache py3-pillow aws-cli bash libc6-compat
+  apk add --no-cache py3-cryptography py3-pillow aws-cli bash libc6-compat
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED TRUE
