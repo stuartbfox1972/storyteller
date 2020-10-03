@@ -2,10 +2,6 @@
 from aws_xray_sdk.ext.flask.middleware import XRayMiddleware
 from aws_xray_sdk.core import patcher, xray_recorder
 from flask import Flask
-import requests
-
-# Patch the requests module to enable automatic instrumentation
-patcher.patch(('requests',))
 
 app = Flask(__name__)
 

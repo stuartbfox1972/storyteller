@@ -5,7 +5,8 @@ HOME="/src"
 /usr/bin/xray -o --bind=0.0.0.0:2000 &
 
 # Start gunicorn listening on all interfaces
-exec gunicorn --chdir app storyteller:app \
+exec gunicorn -c gunicorn.py \
+              --chdir app storyteller:app \
               --workers 2 \
               --threads 4 \
               --access-logfile - \

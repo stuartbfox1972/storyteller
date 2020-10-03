@@ -1,6 +1,10 @@
 from flask import request
 from datetime import datetime
 
+from aws_xray_sdk.core import patch_all
+
+patch_all()
+
 import boto3
 import json
 import jwt
