@@ -1,6 +1,9 @@
 aws-xray-sdk
 boto3
+cryptography
 flask
+flask-cognito
 gunicorn
-requests
 pyjwt
+pytz
+requests
