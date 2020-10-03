@@ -47,4 +47,4 @@ def _decode_token():
         "valid_until_utc": datetime.fromtimestamp(jwt_decoded["exp"],tz=pytz.UTC).isoformat(),
         "jwt_decoded": json.dumps(jwt_decoded, indent=4),
     }
-    return
+    return variables
