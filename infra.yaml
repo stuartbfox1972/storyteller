@@ -410,8 +410,6 @@ Resources:
         Environment:
           - Name: SECRETS_MANAGER_PATH
             Value: !Sub "/${AWS::StackName}/cognito/IDPSecret"
-          - Name: LOGOUT_URL
-            Value: !Sub "${UserPoolDomain}/logout"
 
   ECSService:
     Type: AWS::ECS::Service

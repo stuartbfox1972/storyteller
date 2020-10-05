@@ -1,7 +1,9 @@
 aws-xray-sdk
 boto3
 flask
-flask-cognito
+flask-cors
+flask-jwt-extended
+flask-jwt-extended[asymmetric_crypto]
 gunicorn
 pyjwt
 pytz

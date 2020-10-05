@@ -1,6 +1,6 @@
 from app import app
 from app.stories import _list_stories
-from app.utils import _get_secret, _decode_token
+from app.utils import _decode_token
 from flask import request, render_template, Response, redirect, make_response
 
 from aws_xray_sdk.core import patch_all
