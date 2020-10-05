@@ -33,7 +33,6 @@ def health():
 
 
 @app.route('/api/v1.0/debug', methods=['GET'])
-@cognito_auth_required
 def api():
     payload = _decode_token()
     # #return render_template("debug.html", **variables)
