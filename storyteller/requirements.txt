@@ -1,8 +1,6 @@
 aws-xray-sdk
 boto3
 flask
-flask-cors
-flask-cognito
 gunicorn
 pyjwt
 pytz
