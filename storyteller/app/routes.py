@@ -1,12 +1,11 @@
 from app import app
 from app.stories import _list_stories
 from app.utils import _decode_token
-from flask import request, render_template, Response, redirect, make_response
+from flask_cognito import cognito_auth_required, current_user, current_cognito_jwt
+from flask import jsonify, make_response, redirect, render_template, request, Response
 from aws_xray_sdk.core import patch_all
 
 patch_all()
-
-import pprint
 
 @app.after_request
 def apply_headers(response):
@@ -33,12 +32,17 @@ def logout():
 def health():
     return Response("OK", mimetype='text/text')
 
-@app.route('/api/v1.0/debug', methods=['GET'])
-def api():
-    variables = _decode_token()
-    #return render_template("debug.html", **variables)
-    return Response(payload, mimetype='application/json')
 
+@app.route('/api/v1.0/debug', methods=['GET'])
+@cognito_auth_required
+def api():
+    # payload = _decode_token()
+    # #return render_template("debug.html", **variables)
+    # return Response(payload, mimetype='application/json')
+    return jsonify({
+        'cognito_username': current_cognito_jwt['username'],   # from cognito pool
+        'user_id': current_user.id,   # from your database
+    })
 
 @app.route('/api/v1.0/stories', methods=['GET'])
 def get_stories():
