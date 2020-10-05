@@ -281,7 +281,7 @@ Resources:
           AuthenticateCognitoConfig: 
             OnUnauthenticatedRequest: authenticate
             Scope: openid
-            SessionCookieName: AWSELBAuthSessionCookie
+            SessionCookieName: StoryTellerSession
             SessionTimeout: 60
             UserPoolArn: !GetAtt UserPool.Arn
             UserPoolDomain: !Ref UserPoolDomain
