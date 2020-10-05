@@ -13,18 +13,18 @@ def apply_headers(response):
     return response
 
 
-@app.route('/')
+@app.route('/', methods=['GET'])
 def index():
     return render_template('index.html')
 
 
-@app.route('/health')
+@app.route('/health', methods=['GET'])
 def health():
     return Response("OK", mimetype='text/text')
 
 
 @app.route('/api/v1.0/debug', methods=['GET'])
 def api():
-    payload = _decode_token()
-    # #return render_template("debug.html", **variables)
-    return Response(payload, mimetype='application/json')
+    #payload = _decode_token()
+    #return render_template("debug.html", **variables)
+    return Response('{"Message":"HELLO"}', mimetype='application/json')
