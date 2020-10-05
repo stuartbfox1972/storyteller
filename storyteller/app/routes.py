@@ -2,7 +2,6 @@ from app import app
 from app.stories import _list_stories
 from app.utils import _decode_token
 from flask import request, render_template, Response, redirect, make_response
-
 from aws_xray_sdk.core import patch_all
 
 patch_all()
@@ -37,7 +36,8 @@ def health():
 @app.route('/api/v1.0/debug', methods=['GET'])
 def api():
     variables = _decode_token()
-    return render_template("debug.html", **variables)
+    #return render_template("debug.html", **variables)
+    return Response(payload, mimetype='application/json')
 
 
 @app.route('/api/v1.0/stories', methods=['GET'])
