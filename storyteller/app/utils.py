@@ -8,6 +8,7 @@ patch_all()
 import boto3
 import jwt
 import os
+import pprint
 import requests
 
 
@@ -32,9 +33,9 @@ def _get_secret():
 
 
 def _decode_token():
-    jwt_header = request.headers.get('X-Amzn-Oidc-Data')
+    #jwt_header = request.headers.get('X-Amzn-Oidc-Data')
     
     # #TODO: Fix this!! Grrr
-    jwt_decoded = jwt.decode(jwt_header, verify=False)
-
-    return jwt_decoded
+    #jwt_decoded = jwt.decode(jwt_header, verify=False)
+    pprint(request.headers)
+    #return request.headers

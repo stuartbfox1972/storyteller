@@ -1,6 +1,8 @@
+import os
+
 from app import app
 from app.utils import _decode_token
-from flask import render_template, request, Response, send_from_directory
+from flask import jsonify, render_template, request, Response, send_from_directory
 from aws_xray_sdk.core import patch_all
 
 patch_all()
@@ -31,6 +33,7 @@ def health():
 
 @app.route('/api/v1.0/debug', methods=['GET'])
 def api():
-    #payload = _decode_token()
-    #return render_template("debug.html", **variables)
-    return Response('{"Message":"HELLO"}', mimetype='application/json')
+    print(request.headers)
+    return Response(request.headers, mimetype='application/text')
+    
+    #return Response(payload, mimetype='application/json')
