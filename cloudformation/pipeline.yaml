@@ -1,0 +1,206 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "**WARNING** You will be billed for the AWS resources used if you create a stack from this template"
+
+Metadata:
+  About:
+    Description: "Story Teller - Deployment Pipeline"
+  Author:
+    Description: "Stuart Fox"
+
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: "Github Config"
+        Parameters:
+        - GitHubRepo
+        - GitHubBranch
+        - GitHubUser
+        - GitHubToken
+      - Label:
+          default: "Route53 Hosted Zone"
+        Parameters:
+          - UseHostedZone
+          - WebsiteName
+          - APIName
+          - DomainName
+          - HostedZone
+
+Parameters:
+  GitHubRepo:
+    Type: String
+    Default: storyteller
+  GitHubBranch:
+    Type: String
+    Default: master
+  GitHubToken:
+    Type: String
+    NoEcho: true
+  GitHubUser:
+    Type: String
+    Default: stuartbfox1972
+  UseHostedZone:
+    Type: String
+    AllowedValues:
+      - Yes
+      - No
+  HostedZone:
+    Type: AWS::Route53::HostedZone::Id
+    Description: Route53 Hosted Zone
+  WebsiteName:
+    Type: String
+    Default: "storyteller"
+    Description: "Website Hostname"
+    AllowedPattern: "[a-zA-Z0-9\\-]*"
+  APIName:
+    Type: String
+    Default: "st-api"
+    Description: "API Endpoint Name"
+    AllowedPattern: "[a-zA-Z0-9\\-]*"
+  DomainName:
+    Type: String
+    Description: "Domain Name - Nasty requirement to type in the HostedZone domain (sorry)"
+    AllowedPattern: "[a-zA-Z0-9\\-\\.]*"
+
+Resources:
+  CodeBuildServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Resource: "*"
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - ecr:GetAuthorizationToken
+              - Resource: !Sub arn:aws:s3:::${ArtifactBucket}/*
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:GetObjectVersion
+              - Resource: !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/${Repository}
+                Effect: Allow
+                Action:
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecr:BatchCheckLayerAvailability
+                  - ecr:PutImage
+                  - ecr:InitiateLayerUpload
+                  - ecr:UploadLayerPart
+                  - ecr:CompleteLayerUpload
+
+  CodePipelineServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Resource:
+                  - !Sub arn:aws:s3:::${ArtifactBucket}/*
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetBucketVersioning
+              - Resource: "*"
+                Effect: Allow
+                Action:
+                  - codebuild:StartBuild
+                  - codebuild:BatchGetBuilds
+                  - cloudformation:CreateStack
+                  - cloudformation:DeleteStack
+                  - cloudformation:DescribeStacks
+                  - cloudformation:UpdateStack
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:DeleteChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:ExecuteChangeSet
+                  - cloudformation:SetStackPolicy
+                  - cloudformation:ValidateTemplate
+                  - iam:PassRole
+
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      RoleArn: !GetAtt CodePipelineServiceRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref ArtifactBucket
+      Stages:
+        - Name: DownloadSource
+          Actions:
+            - Name: DownloadSource
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              Configuration:
+                Owner: !Ref GitHubUser
+                Repo: !Ref GitHubRepo
+                Branch: !Ref GitHubBranch
+                OAuthToken: !Ref GitHubToken
+              OutputArtifacts:
+                - Name: DownloadSource
+              RunOrder: 1
+        - Name: DeployInfra
+          Actions:
+            - Name: DeployInfra
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: "1"
+              RunOrder: 2
+              InputArtifacts:
+                - Name: DownloadSource
+              OutputArtifacts:
+                - Name: InfraDeployOutput
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND,CAPABILITY_NAMED_IAM
+                RoleArn: !GetAtt CloudFormationServiceRole.Arn
+                StackName: !Sub "${AWS::StackName}-infra"
+                TemplatePath: "DownloadSource::cloudformation/infra.yaml"
+                ParameterOverrides: !Sub |
+                  {
+                    "UseHostedZone": "${UseHostedZone}",
+                    "HostedZone": "${HostedZone}",
+                    "WebsiteName": "${WebsiteName}",
+                    "DomainName": "${DomainName}",
+                    "APIName": "${APIName}"
+                  }
+
+Outputs:
+  PipelineUrl:
+    Value: !Sub https://console.aws.amazon.com/codepipeline/home?region=${AWS::Region}#/view/${Pipeline}

@@ -1,0 +1,81 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: "**WARNING** You will be billed for the AWS resources used if you create a stack from this template"
+
+Metadata:
+  About:
+    Description: "StoryTeller - Infrastructure"
+  Author:
+    Description: "Stuart Fox"
+
+Parameters:
+  UseHostedZone:
+    Type: String
+  HostedZone:
+    Type: String
+  WebsiteName:
+    Type: String
+  DomainName:
+    Type: String
+  APIName:
+    Type: String
+  
+Resources:
+  # DynamoDB Table
+  StoriesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${AWS::StackName}-data"
+      KeySchema:
+        - AttributeName: "PK"
+          KeyType: "HASH"
+        - AttributeName: "SK"
+          KeyType: "RANGE"
+      AttributeDefinitions:
+        - AttributeName: "PK"
+          AttributeType: "S"
+        - AttributeName: "SK"
+          AttributeType: "S"
+        - AttributeName: "GSIPK1"
+          AttributeType: "S"
+        - AttributeName: "ageRange"
+          AttributeType: "S"
+        - AttributeName: "author"
+          AttributeType: "S"
+      BillingMode: PAY_PER_REQUEST
+      GlobalSecondaryIndexes: 
+        - IndexName: "ListOfStories"
+          KeySchema:
+            - AttributeName: "GSIPK1"
+              KeyType: "HASH"
+          Projection:
+            NonKeyAttributes:
+              - "title"
+              - "tags"
+              - "author"
+              - "ageRange"
+              - "views"
+            ProjectionType: "INCLUDE"
+        - IndexName: "GroupStoriesByAgeRangeIndex"
+          KeySchema:
+            - AttributeName: "ageRange"
+              KeyType: "HASH"
+          Projection:
+            NonKeyAttributes:
+              - "title"
+              - "tags"
+              - "author"
+              - "views"
+            ProjectionType: "INCLUDE"
+        - IndexName: "GroupStoriesByAuthorIndex"
+          KeySchema:
+            - AttributeName: "author"
+              KeyType: "HASH"
+          Projection:
+            NonKeyAttributes:
+              - "title"
+              - "tags"
+              - "ageRange"
+              - "views"
+            ProjectionType: "INCLUDE"
