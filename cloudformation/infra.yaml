@@ -79,3 +79,156 @@ Resources:
               - "ageRange"
               - "views"
             ProjectionType: "INCLUDE"
+
+## Route53 Config Section
+  DNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZone
+      Name: !Sub ${APIName}.${DomainName}
+      Type: A
+      AliasTarget:
+        HostedZoneId: !GetAtt HttpApiDomainName.RegionalHostedZoneId
+        DNSName: !GetAtt HttpApiDomainName.RegionalDomainName
+
+## ACM Cert Config Section
+  APICertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub ${APIName}.${DomainName}
+      ValidationMethod: DNS
+
+  CloudFrontCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub ${WebsiteName}.${DomainName}
+      ValidationMethod: DNS
+
+## API Gateway V2
+  HttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: Story Teller API
+      Description: Story Teller API
+      ProtocolType: HTTP
+      DisableExecuteApiEndpoint: True
+
+  HttpApiDeployment:
+    DependsOn:
+      - HttpApiDefaultRoute
+    Type: AWS::ApiGatewayV2::Deployment
+    Properties:
+      ApiId: !Ref HttpApi
+
+  HttpApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: pub
+      Description: Public Stage
+      DeploymentId: !Ref HttpApiDeployment
+      ApiId: !Ref HttpApi
+
+  HttpApiDomainName:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !Sub ${APIName}.${DomainName}
+      DomainNameConfigurations:
+        - EndpointType: REGIONAL
+          CertificateArn: !Ref APICertificate
+
+  HttpApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      DomainName: !Sub ${APIName}.${DomainName}
+      ApiId: !Ref HttpApi
+      Stage: !Ref HttpApiStage
+
+  HttpApiDefaultRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: $default
+      AuthorizationType: NONE
+      OperationName: DefaultRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref HttpDefaultIntegration
+
+  HttpDefaultIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      Description: Default Integration
+      PayloadFormatVersion: 2.0
+      IntegrationType: AWS_PROXY
+      TimeoutInMillis: 500
+      IntegrationUri: 
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DummyFunction.Arn}/invocations
+
+## Lambda Functions
+  DummyFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "${AWS::StackName}-DummyFunctionRole"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+
+  DummyFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Runtime: python3.7
+      Timeout: 1
+      TracingConfig:
+        Mode: Active
+      Role: !GetAtt DummyFunctionRole.Arn
+      Code:
+        ZipFile: |
+          import json
+          def handler(event, context):
+            message = "Received event: " + json.dumps(event, indent=2))
+            return message
+
+  DummyFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref DummyFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
+
+
+      # Policies:
+      # - DynamoDBCrudPolicy:
+      #     TableName: !Ref StoriesTable
+      # - Statement:
+      #   - Effect: Allow
+      #     Action:
+      #     - execute-api:ManageConnections
+      #     Resource:
+      #     - !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
+
+  XRayAccessPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${AWS::StackName}-XRayAccess"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action:
+            - xray:GetSamplingRules
+            - xray:GetSamplingTargets
+            - xray:PutTraceSegments
+          Resource: 
+          - "*"
+      Roles:
+        - !Ref DummyFunctionRole
