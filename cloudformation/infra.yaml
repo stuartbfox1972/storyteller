@@ -166,8 +166,7 @@ Resources:
     Type: AWS::ApiGatewayV2::Api
     Properties:
       Tags:
-        - Key: "stack-name"
-          Value: !Sub ${AWS::StackName}
+        stack-name: !Sub ${AWS::StackName}
       Name: Story Teller API
       Description: Story Teller API
       ProtocolType: HTTP
