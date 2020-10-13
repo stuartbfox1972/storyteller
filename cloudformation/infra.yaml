@@ -378,7 +378,7 @@ Resources:
           STORIES_TABLE: !Ref StoriesTable
       Code:
         S3Bucket: !Sub ${LambdaBucket}
-        S3Key: lambdas/stories/story.zip
+        S3Key: lambdas/story/story.zip
 
   StoryFunctionPermission:
     Type: AWS::Lambda::Permission
