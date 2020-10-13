@@ -16,7 +16,8 @@ phases:
   build:
     commands:
       - echo Zip lambdas
-      - for dir in $(find lambdas -maxdepth 1 -type d | sed -e 's/\.\///g'); do echo "$dir"; cd "$dir"; zip -r "$dir".zip ./ ; cd .. ; done
+      - cd lambdas ; for dir in $(ls); do echo "$dir"; cd "$dir"; zip -r "$dir".zip ./ ; cd .. ; done
+      - cd ..
   post_build:
     commands:
-      - for zipfile in lambdas/*/*.zip; do aws s3 cp "$zipfile" s3://"${LambdaBucket}"/ ; done
+      - for zipfile in $(ls lambdas/*/*.zip); do aws s3 cp "$zipfile" s3://"${LambdaBucket}"/ ; done
