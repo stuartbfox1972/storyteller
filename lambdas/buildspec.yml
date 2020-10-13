@@ -7,17 +7,16 @@ phases:
       - aws --version
       # Upgrade pip
       - pip install --upgrade pip
-      - pip install --upgrade awscli
   pre_build:
     commands:
       - echo Installing PIP packages
-      - for dir in lambdas/*; do echo "$dir"; if [ -f "$dir"/requirements.txt ]; then (pip install --no-compile -t "$dir"/package/ -r "$dir"/requirements.txt); fi; done
+      - for dir in $(find lambdas -maxdepth 1 -type d | sed -e 's/\.\///g'); do echo "$dir"; if [ -f "$dir"/requirements.txt ]; then (pip install --no-compile -t "$dir"/package/ -r "$dir"/requirements.txt); fi; done
       - echo Removing compiled files
       - rm -f $(find lambdas/ -name *.pyc -type f)
   build:
     commands:
       - echo Zip lambdas
-      - cd lambdas ; for dir in $(find . -type d -depth 1 | sed -e 's/\.\///g'); do cd "$dir"; zip -r "$dir".zip ./ ; cd .. ; done
+      - for dir in $(find lambdas -maxdepth 1 -type d | sed -e 's/\.\///g'); do echo "$dir"; cd "$dir"; zip -r "$dir".zip ./ ; cd .. ; done
   post_build:
     commands:
-      - for zipfile in lambdas/*/*.zip; do aws s3 cp "$zipfile" s3://"${LambdaBucket}"/
+      - for zipfile in lambdas/*/*.zip; do aws s3 cp "$zipfile" s3://"${LambdaBucket}"/ ; done
