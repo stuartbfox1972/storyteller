@@ -66,6 +66,24 @@ Parameters:
     AllowedPattern: "[a-zA-Z0-9\\-\\.]*"
 
 Resources:
+  TagBasedGroup:
+    Type: AWS::ResourceGroups::Group
+    Properties:
+      Name: !Sub "${AWS::StackName}ResourceGroup"
+      Description: "A group that is created via CFN"
+      ResourceQuery:
+        Type:
+          "TAG_FILTERS_1_0" 
+        Query:
+          ResourceTypeFilters: 
+            - "AWS::AllSupported" 
+          TagFilters:
+            - 
+              Key: "stack-name"
+              Values: 
+                - !Sub "${AWS::StackName}"
+                - !Sub "${AWS::StackName}-infra"
+
   CloudFormationServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -195,6 +213,24 @@ Resources:
         - Key: "purpose"
           Value: "lambda-bucket"
 
+  BuildAndCopyLambda:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      TimeoutInMinutes: 5
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: lambdas/buildspec.yml
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:4.0-20.06.15
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+          - Name: LambdaBucket
+            Value: !Ref LambdaBucket
+      ServiceRole: !Ref CodeBuildServiceRole
+
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
@@ -222,6 +258,19 @@ Resources:
               OutputArtifacts:
                 - Name: DownloadSource
               RunOrder: 1
+        - Name: DeployLambdaZips
+          Actions:
+            - Name: ZipAndCopyStoryLambda
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref BuildAndCopyLambda
+              InputArtifacts:
+                - Name: DownloadSource
+              RunOrder: 2
         - Name: DeployInfra
           Actions:
             - Name: DeployInfra
@@ -230,7 +279,7 @@ Resources:
                 Owner: AWS
                 Provider: CloudFormation
                 Version: "1"
-              RunOrder: 2
+              RunOrder: 3
               InputArtifacts:
                 - Name: DownloadSource
               OutputArtifacts:
@@ -247,7 +296,8 @@ Resources:
                     "HostedZone": "${HostedZone}",
                     "WebsiteName": "${WebsiteName}",
                     "DomainName": "${DomainName}",
-                    "APIName": "${APIName}"
+                    "APIName": "${APIName}",
+                    "LambdaBucket": "${LambdaBucket}"
                   }
 
 Outputs:
