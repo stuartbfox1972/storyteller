@@ -334,9 +334,6 @@ Resources:
   XRayAccessPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      Tags:
-        - Key: "stack-name"
-          Value: !Sub ${AWS::StackName}
       PolicyName: !Sub "${AWS::StackName}-XRayAccess"
       PolicyDocument:
         Version: "2012-10-17"
