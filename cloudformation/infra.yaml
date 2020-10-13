@@ -193,8 +193,12 @@ Resources:
 
   HttpApiDomainName:
     Type: AWS::ApiGatewayV2::DomainName
+    DependsOn:
+      - DNSRecord
     Properties:
-      DomainName: !Sub ${APIName}.${DomainName}
+      Tags:
+        stack-name: !Sub ${AWS::StackName}
+      DomainName: !Sub "${APIName}.${DomainName}"
       DomainNameConfigurations:
         - EndpointType: REGIONAL
           CertificateArn: !Ref APICertificate
@@ -202,10 +206,11 @@ Resources:
   HttpApiMapping:
     Type: AWS::ApiGatewayV2::ApiMapping
     DependsOn:
+      - DNSRecord
       - HttpApi
       - HttpApiStage
     Properties:
-      DomainName: !Sub ${APIName}.${DomainName}
+      DomainName: !Sub "${APIName}.${DomainName}"
       ApiId: !Ref HttpApi
       Stage: !Ref HttpApiStage
 
