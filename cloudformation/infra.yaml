@@ -10,7 +10,7 @@ Metadata:
     Description: "Stuart Fox"
 
 Parameters:
-  UseHostedZone:
+  DebugFunction:
     Type: String
   HostedZone:
     Type: String
@@ -21,8 +21,12 @@ Parameters:
   APIName:
     Type: String
   
+Conditions:
+  DeployDebugFunction:
+    Fn::Equals: [ "Yes", !Ref DebugFunction ]
+
 Resources:
-  # DynamoDB Table
+  ## DynamoDB Table
   StoriesTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -80,7 +84,48 @@ Resources:
               - "views"
             ProjectionType: "INCLUDE"
 
-## Route53 Config Section
+  ## Cognito
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${AWS::StackName}-UserPool
+      AliasAttributes:
+        - email
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+      AutoVerifiedAttributes:
+        - email
+      UsernameConfiguration:
+        CaseSensitive: false
+      DeviceConfiguration:
+        ChallengeRequiredOnNewDevice: true
+        DeviceOnlyRememberedOnUserPrompt: true
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+          TemporaryPasswordValidityDays: 1
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: cognito-apigateway
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      UserPoolId: !Ref UserPool
+
+  ## Route53 Config Section
   DNSRecord:
     Type: AWS::Route53::RecordSet
     Properties:
@@ -91,7 +136,7 @@ Resources:
         HostedZoneId: !GetAtt HttpApiDomainName.RegionalHostedZoneId
         DNSName: !GetAtt HttpApiDomainName.RegionalDomainName
 
-## ACM Cert Config Section
+  ## ACM Cert Config Section
   APICertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
@@ -113,20 +158,25 @@ Resources:
       ProtocolType: HTTP
       DisableExecuteApiEndpoint: True
 
-  HttpApiDeployment:
-    DependsOn:
-      - HttpApiDefaultRoute
-    Type: AWS::ApiGatewayV2::Deployment
+  HttpApiAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
     Properties:
+      Name: !Sub ${AWS::StackName}-JwtAuthorizer
       ApiId: !Ref HttpApi
+      AuthorizerType: JWT
+      IdentitySource:
+        - "$request.header.Authorization"
+      JwtConfiguration:
+        Audience:
+          - !Ref UserPoolClient
+        Issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}"
 
   HttpApiStage:
     Type: AWS::ApiGatewayV2::Stage
     Properties:
-      StageName: pub
-      Description: Public Stage
-      DeploymentId: !Ref HttpApiDeployment
       ApiId: !Ref HttpApi
+      AutoDeploy: true
+      StageName: $default
 
   HttpApiDomainName:
     Type: AWS::ApiGatewayV2::DomainName
@@ -143,23 +193,51 @@ Resources:
       ApiId: !Ref HttpApi
       Stage: !Ref HttpApiStage
 
-  HttpApiDefaultRoute:
+  HttpApiDebugRoute:
+    Condition: DeployDebugFunction
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref HttpApi
-      RouteKey: $default
-      AuthorizationType: NONE
-      OperationName: DefaultRoute
+      RouteKey: "GET /api/v1.0/secret/debug"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref HttpApiAuthorizer
+      OperationName: Debug
       Target: !Join
         - '/'
         - - 'integrations'
-          - !Ref HttpDefaultIntegration
-
-  HttpDefaultIntegration:
+          - !Ref HttpDebugIntegration
+        
+  HttpDebugIntegration:
+    Condition: DeployDebugFunction
     Type: AWS::ApiGatewayV2::Integration
     Properties:
       ApiId: !Ref HttpApi
-      Description: Default Integration
+      Description: Debug Integration
+      PayloadFormatVersion: 2.0
+      IntegrationType: AWS_PROXY
+      TimeoutInMillis: 500
+      IntegrationUri: 
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DummyFunction.Arn}/invocations
+
+  HttpApiStoryRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "GET /api/v1.0/story"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref HttpApiAuthorizer
+      OperationName: Story
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref HttpStoryIntegration
+
+  HttpStoryIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      Description: Story Integration
       PayloadFormatVersion: 2.0
       IntegrationType: AWS_PROXY
       TimeoutInMillis: 500
@@ -180,6 +258,15 @@ Resources:
             Principal:
               Service:
               - lambda.amazonaws.com
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: arn:aws:logs:*:*:*
 
   DummyFunction:
     Type: AWS::Lambda::Function
@@ -190,11 +277,14 @@ Resources:
       TracingConfig:
         Mode: Active
       Role: !GetAtt DummyFunctionRole.Arn
+      Environment:
+        Variables:
+          STORIES_TABLE: !Ref StoriesTable
       Code:
         ZipFile: |
           import json
           def handler(event, context):
-            message = "Received event: " + json.dumps(event, indent=2))
+            message = json.dumps(event, indent=2)
             return message
 
   DummyFunctionPermission:

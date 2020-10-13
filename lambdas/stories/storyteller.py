@@ -5,7 +5,7 @@ import json
 from boto3.dynamodb.conditions import Key, Attr
 
 def lambda_handler(event, context):
-  if event['resource'] == '/story':
+  if event['rawPath'] == '/api/v1.0/story':
     dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
     table = dynamodb.Table('story-teller-dev-data')
     response = table.()
