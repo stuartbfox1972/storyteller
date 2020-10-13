@@ -69,6 +69,9 @@ Resources:
   CloudFormationServiceRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
       Path: /
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -89,6 +92,9 @@ Resources:
   CodeBuildServiceRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
       Path: /
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -118,6 +124,9 @@ Resources:
   CodePipelineServiceRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
       Path: /
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -159,10 +168,39 @@ Resources:
   ArtifactBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
+    Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
+        - Key: "purpose"
+          Value: "artifact-bucket"
+
+  StaticAssetsBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
+        - Key: "purpose"
+          Value: "static-assets-bucket"
+
+  LambdaBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
+        - Key: "purpose"
+          Value: "lambda-bucket"
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
       RoleArn: !GetAtt CodePipelineServiceRole.Arn
       ArtifactStore:
         Type: S3

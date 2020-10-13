@@ -23,14 +23,17 @@ Parameters:
   
 Conditions:
   DeployDebugFunction:
-    Fn::Equals: [ "Yes", !Ref DebugFunction ]
+    Fn::Equals: [ true, !Ref DebugFunction ]
 
 Resources:
   ## DynamoDB Table
   StoriesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: !Sub "${AWS::StackName}-data"
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
+      #TableName: !Sub "${AWS::StackName}-data"
       KeySchema:
         - AttributeName: "PK"
           KeyType: "HASH"
@@ -88,7 +91,10 @@ Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Sub ${AWS::StackName}-UserPool
+      UserPoolTags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
+      #UserPoolName: !Sub ${AWS::StackName}-UserPool
       AliasAttributes:
         - email
       Schema:
@@ -140,19 +146,28 @@ Resources:
   APICertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
       DomainName: !Sub ${APIName}.${DomainName}
       ValidationMethod: DNS
 
   CloudFrontCertificate:
     Type: AWS::CertificateManager::Certificate
     Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
       DomainName: !Sub ${WebsiteName}.${DomainName}
       ValidationMethod: DNS
 
-## API Gateway V2
+  ## API Gateway V2
   HttpApi:
     Type: AWS::ApiGatewayV2::Api
     Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
       Name: Story Teller API
       Description: Story Teller API
       ProtocolType: HTTP
@@ -220,19 +235,30 @@ Resources:
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DummyFunction.Arn}/invocations
 
-  HttpApiStoryRoute:
+  HttpApiStoriesRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref HttpApi
       RouteKey: "GET /api/v1.0/story"
       AuthorizationType: JWT
       AuthorizerId: !Ref HttpApiAuthorizer
-      OperationName: Story
       Target: !Join
         - '/'
         - - 'integrations'
           - !Ref HttpStoryIntegration
 
+  HttpApiStoryRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "GET /api/v1.0/story/{id}"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref HttpApiAuthorizer
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref HttpStoryIntegration
+  
   HttpStoryIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
@@ -245,10 +271,13 @@ Resources:
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DummyFunction.Arn}/invocations
 
-## Lambda Functions
+  ## Lambda Functions
   DummyFunctionRole:
     Type: AWS::IAM::Role
     Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
       RoleName: !Sub "${AWS::StackName}-DummyFunctionRole"
       AssumeRolePolicyDocument:
         Statement:
@@ -271,6 +300,9 @@ Resources:
   DummyFunction:
     Type: AWS::Lambda::Function
     Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
       Handler: index.handler
       Runtime: python3.7
       Timeout: 1
@@ -295,20 +327,12 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
 
-
-      # Policies:
-      # - DynamoDBCrudPolicy:
-      #     TableName: !Ref StoriesTable
-      # - Statement:
-      #   - Effect: Allow
-      #     Action:
-      #     - execute-api:ManageConnections
-      #     Resource:
-      #     - !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
-
   XRayAccessPolicy:
     Type: AWS::IAM::Policy
     Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
       PolicyName: !Sub "${AWS::StackName}-XRayAccess"
       PolicyDocument:
         Version: "2012-10-17"
