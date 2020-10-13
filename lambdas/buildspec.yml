@@ -2,7 +2,7 @@ version: 0.2
 phases:
   install:
     commands:
-      echo "Updating the build environment"
+      - echo "Updating the build environment"
       # Purely informational
       - aws --version
       # Upgrade pip
