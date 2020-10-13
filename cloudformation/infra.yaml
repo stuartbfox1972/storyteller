@@ -193,8 +193,6 @@ Resources:
 
   HttpApiDomainName:
     Type: AWS::ApiGatewayV2::DomainName
-    DependsOn:
-      - DNSRecord
     Properties:
       Tags:
         stack-name: !Sub ${AWS::StackName}
@@ -206,10 +204,11 @@ Resources:
   HttpApiMapping:
     Type: AWS::ApiGatewayV2::ApiMapping
     DependsOn:
+      - HttpApiDomainName
       - HttpApi
       - HttpApiStage
     Properties:
-      DomainName: !Sub "${APIName}.${DomainName}"
+      DomainName: !Ref HttpApiDomainName
       ApiId: !Ref HttpApi
       Stage: !Ref HttpApiStage
 
