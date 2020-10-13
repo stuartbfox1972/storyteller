@@ -201,6 +201,9 @@ Resources:
 
   HttpApiMapping:
     Type: AWS::ApiGatewayV2::ApiMapping
+    DependsOn:
+      - HttpApi
+      - HttpApiStage
     Properties:
       DomainName: !Sub ${APIName}.${DomainName}
       ApiId: !Ref HttpApi
