@@ -206,7 +206,6 @@ Resources:
   HttpApiMapping:
     Type: AWS::ApiGatewayV2::ApiMapping
     DependsOn:
-      - DNSRecord
       - HttpApi
       - HttpApiStage
     Properties:
