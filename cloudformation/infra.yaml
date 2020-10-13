@@ -92,8 +92,7 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolTags:
-        - Key: "stack-name"
-          Value: !Sub ${AWS::StackName}
+        stack-name: !Sub ${AWS::StackName}
       #UserPoolName: !Sub ${AWS::StackName}-UserPool
       AliasAttributes:
         - email
