@@ -236,11 +236,6 @@ Resources:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:4.0-20.06.15
         Type: LINUX_CONTAINER
-        EnvironmentVariables:
-          - Name: LambdaBucket
-            Value: !Ref LambdaBucket
-          - Name: LambdaVersion
-            Value: "#{codepipeline.PipelineExecutionId}"
       ServiceRole: !Ref CodeBuildServiceRole
 
   Pipeline:
@@ -280,6 +275,15 @@ Resources:
                 Provider: CodeBuild
               Configuration:
                 ProjectName: !Ref BuildAndCopyLambda
+                #LambdaVersion: "#{codepipeline.PipelineExecutionId}"
+                EnvironmentVariables: !Sub '[{"name": "LambdaBucket",
+                                        "value":"${LambdaBucket}",
+                                        "type":"PLAINTEXT"
+                                        },
+                                       {"name": "LambdaVersion",
+                                        "value":"#{codepipeline.PipelineExecutionId}",
+                                        "type":"PLAINTEXT"
+                                       }]'
               InputArtifacts:
                 - Name: DownloadSource
               RunOrder: 2
@@ -294,8 +298,6 @@ Resources:
               RunOrder: 3
               InputArtifacts:
                 - Name: DownloadSource
-              OutputArtifacts:
-                - Name: InfraDeployOutput
               Configuration:
                 ActionMode: REPLACE_ON_FAILURE
                 Capabilities: CAPABILITY_IAM,CAPABILITY_AUTO_EXPAND,CAPABILITY_NAMED_IAM
