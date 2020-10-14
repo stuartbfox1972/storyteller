@@ -1,5 +1,7 @@
 #!/bin/bash
-CONFIG=scripts/config.txt
+
+cd scripts
+CONFIG=config.txt
 
 if [ -f "$CONFIG" ]; then
     . $CONFIG
