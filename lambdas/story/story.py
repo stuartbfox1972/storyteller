@@ -15,8 +15,8 @@ class DecimalEncoder(json.JSONEncoder):
 
 def story_handler(event, context):
   if event["routeKey"] == "GET /api/v1.0/story":
-    table = dynamodb.Table(os.environ['STORIES_TABLE'])
     dynamodb = boto3.resource("dynamodb")
+    table = dynamodb.Table(os.environ['STORIES_TABLE'])
     results=[]
     response = table.scan(
         Limit=25,
