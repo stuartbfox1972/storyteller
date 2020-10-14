@@ -10,7 +10,7 @@ Metadata:
     Description: "Stuart Fox"
 
 Parameters:
-  DebugFunction:
+  DebugFunctionBool:
     Type: String
   HostedZone:
     Type: String
@@ -25,7 +25,7 @@ Parameters:
   
 Conditions:
   DeployDebugFunction:
-    Fn::Equals: [ true, !Ref DebugFunction ]
+    Fn::Equals: [ true, !Ref DebugFunctionBool ]
 
 Resources:
   ## DynamoDB Table
