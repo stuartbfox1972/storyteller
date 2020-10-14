@@ -22,6 +22,8 @@ Parameters:
     Type: String
   LambdaBucket:
     Type: String
+  LambdaVersion:
+    Type: String
   
 Conditions:
   DeployDebugFunction:
@@ -378,7 +380,7 @@ Resources:
           STORIES_TABLE: !Ref StoriesTable
       Code:
         S3Bucket: !Sub ${LambdaBucket}
-        S3Key: lambdas/story/story.zip
+        S3Key: lambdas/story/story-${LambdaVersion}.zip
 
   StoryFunctionPermission:
     Type: AWS::Lambda::Permission

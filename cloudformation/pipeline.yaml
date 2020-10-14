@@ -239,6 +239,8 @@ Resources:
         EnvironmentVariables:
           - Name: LambdaBucket
             Value: !Ref LambdaBucket
+          - Name: LambdaVersion
+            Value: "#{codepipeline.PipelineExecutionId}"
       ServiceRole: !Ref CodeBuildServiceRole
 
   Pipeline:
@@ -307,7 +309,8 @@ Resources:
                     "WebsiteName": "${WebsiteName}",
                     "DomainName": "${DomainName}",
                     "APIName": "${APIName}",
-                    "LambdaBucket": "${LambdaBucket}"
+                    "LambdaBucket": "${LambdaBucket}",
+                    "LambdaVersion": "#{codepipeline.PipelineExecutionId}"
                   }
 
 Outputs:
