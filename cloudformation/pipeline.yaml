@@ -44,9 +44,9 @@ Parameters:
     Type: String
     Description: Deploys a debug lambda function and apigateway route for debugging
     AllowedValues:
-      - Yes
-      - No
-    Default: No
+      - true
+      - false
+    Default: false
   HostedZone:
     Type: AWS::Route53::HostedZone::Id
     Description: Route53 Hosted Zone

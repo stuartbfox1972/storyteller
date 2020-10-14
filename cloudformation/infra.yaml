@@ -275,7 +275,7 @@ Resources:
       TimeoutInMillis: 500
       IntegrationUri: 
         Fn::Sub:
-            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DebugFunction.Arn}/invocations
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StoryFunction.Arn}/invocations
 
   ## Lambda Functions
   DebugFunctionRole:
@@ -367,7 +367,7 @@ Resources:
       Tags:
         - Key: "stack-name"
           Value: !Sub ${AWS::StackName}
-      Handler: index.handler
+      Handler: story.story_handler
       Runtime: python3.8
       Timeout: 1
       TracingConfig:
