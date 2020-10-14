@@ -132,7 +132,9 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-              - Resource: !Sub arn:aws:s3:::${ArtifactBucket}/*
+              - Resource:
+                  - !Sub arn:aws:s3:::${ArtifactBucket}/*
+                  - !Sub arn:aws:s3:::${LambdaBucket}/*
                 Effect: Allow
                 Action:
                   - s3:GetObject
