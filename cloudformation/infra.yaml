@@ -359,7 +359,7 @@ Resources:
             - dynamodb:*
             Resource: 
               - arn:aws:logs:*:*:*
-              - !GetAtt StoriesTable
+              - !GetAtt StoriesTable.Arn
 
   StoryFunction:
     Type: AWS::Lambda::Function
@@ -404,3 +404,4 @@ Resources:
           - "*"
       Roles:
         - !Ref DebugFunctionRole
+        - !Ref StoryFunctionRole
