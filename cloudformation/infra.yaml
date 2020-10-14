@@ -275,7 +275,7 @@ Resources:
       TimeoutInMillis: 500
       IntegrationUri: 
         Fn::Sub:
-            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DummyFunction.Arn}/invocations
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DebugFunction.Arn}/invocations
 
   ## Lambda Functions
   DebugFunctionRole:
