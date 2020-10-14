@@ -239,7 +239,7 @@ Resources:
       TimeoutInMillis: 500
       IntegrationUri: 
         Fn::Sub:
-            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DummyFunction.Arn}/invocations
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DebugFunction.Arn}/invocations
 
   HttpApiStoriesRoute:
     Type: AWS::ApiGatewayV2::Route
@@ -284,7 +284,7 @@ Resources:
       Tags:
         - Key: "stack-name"
           Value: !Sub ${AWS::StackName}
-      RoleName: !Sub "${AWS::StackName}-DummyFunctionRole"
+      RoleName: !Sub "${AWS::StackName}-DebugFunctionRole"
       AssumeRolePolicyDocument:
         Statement:
           - Action:
@@ -403,4 +403,4 @@ Resources:
           Resource: 
           - "*"
       Roles:
-        - !Ref DummyFunctionRole
+        - !Ref DebugFunctionRole
