@@ -380,7 +380,7 @@ Resources:
           STORIES_TABLE: !Ref StoriesTable
       Code:
         S3Bucket: !Sub ${LambdaBucket}
-        S3Key: lambdas/story/story-${LambdaVersion}.zip
+        S3Key: !Sub lambdas/story/story-${LambdaVersion}.zip
 
   StoryFunctionPermission:
     Type: AWS::Lambda::Permission
