@@ -22,4 +22,4 @@ phases:
       - pwd
   post_build:
     commands:
-      - for zipfile in $(ls lambdas/*/*.zip); do aws s3 cp "$zipfile" s3://"${LambdaBucket}"/ ; done
+      - for zipfile in $(ls lambdas/*/*.zip); do aws s3 cp "$zipfile" s3://"${LambdaBucket}"/"$zipfile" ; done
