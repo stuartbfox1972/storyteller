@@ -352,7 +352,7 @@ Resources:
     Properties:
       DistributionConfig:
         Origins:
-          - DomainName: !Sub ${StaticAssetsBucket}.${AWS::Region}.amazonaws.com
+          - DomainName: !Sub ${StaticAssetsBucket}.s3.${AWS::Region}.amazonaws.com
             Id: S3-private-bucket
             S3OriginConfig:
               OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${CloudFrontOriginIdentity}
