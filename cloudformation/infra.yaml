@@ -283,11 +283,22 @@ Resources:
           Statement:
           - Effect: Allow
             Action:
-            - logs:*
-            - dynamodb:*
+              - logs:*
+              - dynamodb:*
+              - xray:GetSamplingRules
+              - xray:GetSamplingTargets
+              - xray:PutTraceSegments
             Resource: 
               - arn:aws:logs:*:*:*
               - !GetAtt StoriesTable.Arn
+          - Effect: Allow
+            Action:
+              - xray:GetSamplingRules
+              - xray:GetSamplingTargets
+              - xray:PutTraceSegments
+            Resource:
+              - "*"
+          
 
   StoryFunction:
     Type: AWS::Lambda::Function
@@ -316,19 +327,19 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
 
-  XRayAccessPolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: !Sub "${AWS::StackName}-XRayAccess"
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-        - Effect: Allow
-          Action:
-            - xray:GetSamplingRules
-            - xray:GetSamplingTargets
-            - xray:PutTraceSegments
-          Resource: 
-          - "*"
-      Roles:
-        - !Ref StoryFunctionRole
+  # XRayAccessPolicy:
+  #   Type: AWS::IAM::Policy
+  #   Properties:
+  #     PolicyName: !Sub "${AWS::StackName}-XRayAccess"
+  #     PolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #       - Effect: Allow
+  #         Action:
+  #           - xray:GetSamplingRules
+  #           - xray:GetSamplingTargets
+  #           - xray:PutTraceSegments
+  #         Resource: 
+  #         - "*"
+  #     Roles:
+  #       - !Ref StoryFunctionRole
