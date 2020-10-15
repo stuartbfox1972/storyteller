@@ -1,5 +1,5 @@
 {
-    "storyteller-infra-StoriesTable-9ZBCCPV14IKB": [
+    "REPLACE_TABLE_NAME": [
         {
             "PutRequest": {
                 "Item": {
@@ -66,6 +66,8 @@
                 "Item": {
                     "PK": {"S":"STORY#0"},
                     "SK": {"S":"PARAGRAPH#0"},
+                    "storyId":"0",
+                    "paragraphId": "0",
                     "body": {"S":"You are standing in a hallway of your grand parents rancher. There is a very spooky atmosphere and you are itching to leave without being seen. You see doors on your left and right. What do you do?"},
                     "choices": {"M": {"Take the left door": {"S": "1"},"Take the right door": {"S": "2"}}}
                 }
@@ -76,6 +78,8 @@
                 "Item": {
                     "PK": {"S":"STORY#0"},
                     "SK": {"S":"PARAGRAPH#1"},
+                    "storyId":"0",
+                    "paragraphId": "1",
                     "body": {"S":"You arrive in an open space, you look around and see an attic door and a trap door. What do you do?"},
                     "choices": {"M": {"Attic ": {"S": "3"}, "Trap Door": {"S": "4"}, "Go Back": {"S":"0"}}}
                 }
@@ -87,6 +91,8 @@
                 "Item": {
                     "PK": {"S":"STORY#0"},
                     "SK": {"S":"PARAGRAPH#2"},
+                    "storyId":"0",
+                    "paragraphId": "2",
                     "body": {"S":"You are now outside and see a garden shed and a double garage. Where do you go?"},
                     "choices": {"M": {"Shed ": {"S": "5"}, "Garage": {"S": "6"}, "Go Back": {"S":"0"}}}
                 }
@@ -97,6 +103,8 @@
                 "Item": {
                     "PK": {"S":"STORY#0"},
                     "SK": {"S":"PARAGRAPH#3"},
+                    "storyId":"0",
+                    "paragraphId": "3",
                     "body": {"S":"As you enter the attic, your mistake becomes all too real. Your grand parents booby trapped the attic and a large statue falls on your head killing you instantly."},
                     "end": {"S": "True"}
                 }
@@ -107,6 +115,8 @@
                 "Item": {
                     "PK": {"S":"STORY#0"},
                     "SK": {"S":"PARAGRAPH#4"},
+                    "storyId":"0",
+                    "paragraphId": "4",
                     "body": {"S":"As you enter the basement through the trap door, your mistake becomes all too real. Your grand parents booby trapped the door and it slams shut above you. There is no way out. You die a slow, thirsty and hungry death."},
                     "end": {"S": "True"}
                 }
@@ -117,6 +127,8 @@
                 "Item": {
                     "PK": {"S":"STORY#0"},
                     "SK": {"S":"PARAGRAPH#5"},
+                    "storyId":"0",
+                    "paragraphId": "5",
                     "body": {"S":"As you enter the garden shed, the secret life of your murderous grand parents is revealed to you. You see fresh body parts on the table and your grand father standing over them. The last thing you see is the gun pointing at your face"},
                     "end": {"S": "True"},
                     "choices": {"M": {"Exit ": {"S": "100"}}}
@@ -128,6 +140,8 @@
                 "Item": {
                     "PK": {"S":"STORY#0"},
                     "SK": {"S":"PARAGRAPH#6"},
+                    "storyId":"0",
+                    "paragraphId": "6",
                     "body": {"S":"You enter the double garage and notice 2 vehicles; a large old unmarked van and a new looking Mercedes."},
                     "choices": {"M": {"Enter the Van": {"S": "7"}, "Enter the Mercedes": {"S":"8"}}}
                 }
@@ -138,6 +152,8 @@
                 "Item": {
                     "PK": {"S":"STORY#0"},
                     "SK": {"S":"PARAGRAPH#7"},
+                    "storyId":"0",
+                    "paragraphId": "7",
                     "body": {"S":"You climb into the front seat of the van and hunt for the key. You hear a noise behind you and turn around to see you grand mother slashing at your throat. The last thing you see is her sweet smile as you fade away"},
                     "end": {"S": "True"},
                     "choices": {"M": {"Exit ": {"S": "100"}}}
@@ -149,6 +165,8 @@
                 "Item": {
                     "PK": {"S":"STORY#0"},
                     "SK": {"S":"PARAGRAPH#8"},
+                    "storyId":"0",
+                    "paragraphId": "9",
                     "body": {"S":"You climb into the front seat of the Mercedes and hunt for the key. You hear a noise behind you and turn around to see you grand mother, covered in blood and carrying a wicked looking kitchen knife, climbing out of the var. You fumble the key into the iginition and the car roars into life. You slam it into drive and take off out of the open garage door to your freedom!"},
                     "end": {"S": "True"},
                     "choices": {"M": {"Exit ": {"S": "101"}}}
@@ -160,6 +178,8 @@
                 "Item": {
                     "PK": {"S":"STORY#0"},
                     "SK": {"S":"PARAGRAPH#100"},
+                    "storyId":"0",
+                    "paragraphId": "100",
                     "body": {"S":"Your spooky adventure has come to a sticky end, have became your grand parents 41st victim. Can anybody escape them?"},
                     "end": {"S": "True"}
                 }
@@ -170,6 +190,8 @@
                 "Item": {
                     "PK": {"S":"STORY#0"},
                     "SK": {"S":"PARAGRAPH#101"},
+                    "storyId":"0",
+                    "paragraphId": "101",
                     "body": {"S":"Congratulations in escaping your grand parents evil lair, you narrowly avoided becoming your grand parents 41st victim. Can anybody stop them?"},
                     "end": {"S": "True"}
                 }

@@ -16,10 +16,10 @@ fi
 
 TABLE=$(aws --region ${REGION} cloudformation describe-stack-resource --stack-name ${STACK} --logical-resource-id StoriesTable --query "StackResourceDetail.PhysicalResourceId" --output text)
 
+cp first_story.json load.json
 if [ "$(uname)" == "Darwin" ]; then
-    sed -i '' 's/REPLACE_TABLE_NAME/'${TABLE}'/g' first_story.json
+    sed -i '' 's/REPLACE_TABLE_NAME/'${TABLE}'/g' load.json
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
-    # Do something under GNU/Linux platform
-    sed -i 's/REPLACE_TABLE_NAME/'${TABLE}'/g' first_story.json
+    sed -i 's/REPLACE_TABLE_NAME/'${TABLE}'/g' load.json
 fi
-aws --region ${REGION} dynamodb batch-write-item --request-items file://first_story.json
+aws --region ${REGION} dynamodb batch-write-item --request-items file://load.json

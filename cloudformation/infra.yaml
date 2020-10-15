@@ -321,6 +321,8 @@ Resources:
             Resource: arn:aws:logs:*:*:*
 
   DebugFunction:
+    DependsOn:
+      - DebugFunctionRole
     Type: AWS::Lambda::Function
     Properties:
       Tags:
