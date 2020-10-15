@@ -231,6 +231,21 @@ Resources:
         Type: LINUX_CONTAINER
       ServiceRole: !Ref CodeBuildServiceRole
 
+  BuildAndCopyStaticContent:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      TimeoutInMinutes: 5
+      Artifacts:
+        Type: CODEPIPELINE
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: static/buildspec.yml
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:4.0-20.06.15
+        Type: LINUX_CONTAINER
+      ServiceRole: !Ref CodeBuildServiceRole
+
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
@@ -258,9 +273,9 @@ Resources:
               OutputArtifacts:
                 - Name: DownloadSource
               RunOrder: 1
-        - Name: DeployLambdaZips
+        - Name: DeployLambdaAndContent
           Actions:
-            - Name: ZipAndCopyStoryLambda
+            - Name: ZipAndCopyLambdas
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -268,7 +283,6 @@ Resources:
                 Provider: CodeBuild
               Configuration:
                 ProjectName: !Ref BuildAndCopyLambda
-                #LambdaVersion: "#{codepipeline.PipelineExecutionId}"
                 EnvironmentVariables: !Sub '[{"name": "LambdaBucket",
                                         "value":"${LambdaBucket}",
                                         "type":"PLAINTEXT"
@@ -277,6 +291,21 @@ Resources:
                                         "value":"#{codepipeline.PipelineExecutionId}",
                                         "type":"PLAINTEXT"
                                        }]'
+              InputArtifacts:
+                - Name: DownloadSource
+              RunOrder: 2
+            - Name: CopyStaticContent
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref BuildAndCopyStaticContent
+                EnvironmentVariables: !Sub '[{"name": "StaticAssetsBucket",
+                                        "value":"${StaticAssetsBucket}",
+                                        "type":"PLAINTEXT"
+                                        }]'
               InputArtifacts:
                 - Name: DownloadSource
               RunOrder: 2
