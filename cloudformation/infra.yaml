@@ -287,6 +287,8 @@ Resources:
             Principal:
               Service:
               - lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
       Policies:
       - PolicyName: root
         PolicyDocument:
@@ -296,20 +298,9 @@ Resources:
             Action:
               - logs:*
               - dynamodb:*
-              - xray:GetSamplingRules
-              - xray:GetSamplingTargets
-              - xray:PutTraceSegments
             Resource: 
               - arn:aws:logs:*:*:*
               - !GetAtt StoriesTable.Arn
-          - Effect: Allow
-            Action:
-              - xray:GetSamplingRules
-              - xray:GetSamplingTargets
-              - xray:PutTraceSegments
-              - xray:PutTelemetryRecords
-            Resource:
-              - "*" 
 
   StoryFunction:
     Type: AWS::Lambda::Function

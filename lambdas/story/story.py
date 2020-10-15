@@ -4,6 +4,9 @@ import json
 import os
 
 from boto3.dynamodb.conditions import Key, Attr
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
+patch_all()
 
 dynamodb = boto3.resource("dynamodb")
 table = dynamodb.Table(os.environ['STORIES_TABLE'])
