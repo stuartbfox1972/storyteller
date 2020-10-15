@@ -133,7 +133,7 @@ Resources:
       UserPoolId: !Ref UserPool
 
   ## Route53 Config Section
-  DNSRecord:
+  ApiDNSRecord:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: !Ref HostedZone
@@ -142,6 +142,16 @@ Resources:
       AliasTarget:
         HostedZoneId: !GetAtt HttpApiDomainName.RegionalHostedZoneId
         DNSName: !GetAtt HttpApiDomainName.RegionalDomainName
+
+  WebDNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref HostedZone
+      Name: !Sub ${WebsiteName}.${DomainName}
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt CloudFrontDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
 
   ## ACM Cert Config Section
   APICertificate:
@@ -298,8 +308,7 @@ Resources:
               - xray:GetSamplingTargets
               - xray:PutTraceSegments
             Resource:
-              - "*"
-          
+              - "*" 
 
   StoryFunction:
     Type: AWS::Lambda::Function
@@ -343,7 +352,8 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginIdentity}'
+              CanonicalUser: !GetAtt CloudFrontOriginIdentity.S3CanonicalUserId
+              #AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginIdentity}'
             Action: 's3:GetObject'
             Resource: !Sub arn:aws:s3:::${StaticAssetsBucket}/*
 
@@ -351,6 +361,9 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
+        Aliases:
+          - !Sub ${WebsiteName}.${DomainName}
+        DefaultRootObject: index.html
         Origins:
           - DomainName: !Sub ${StaticAssetsBucket}.s3.${AWS::Region}.amazonaws.com
             Id: S3-private-bucket
@@ -362,6 +375,7 @@ Resources:
           AllowedMethods:
             - GET
             - HEAD
+            - OPTIONS
           TargetOriginId: S3-private-bucket
           ForwardedValues:
             QueryString: 'false'
@@ -369,4 +383,6 @@ Resources:
               Forward: none
           ViewerProtocolPolicy: redirect-to-https
         ViewerCertificate:
-          CloudFrontDefaultCertificate: 'true'
+          AcmCertificateArn: !Ref CloudFrontCertificate
+          MinimumProtocolVersion: 'TLSv1.2_2019'
+          SslSupportMethod: 'sni-only'
