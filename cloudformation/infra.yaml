@@ -343,7 +343,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !GetAtt  CloudFrontOriginIdentity.Arn
+              AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginIdentity}'
             Action: 's3:GetObject'
             Resource: !Sub arn:aws:s3:::${StaticAssetsBucket}/*
 
