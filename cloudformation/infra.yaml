@@ -22,6 +22,8 @@ Parameters:
     Type: String
   LambdaVersion:
     Type: String
+  StaticAssetsBucket:
+    Type: String
 
 Resources:
   ## DynamoDB Table
@@ -31,7 +33,6 @@ Resources:
       Tags:
         - Key: "stack-name"
           Value: !Sub ${AWS::StackName}
-      #TableName: !Sub "${AWS::StackName}-data"
       KeySchema:
         - AttributeName: "PK"
           KeyType: "HASH"
@@ -327,19 +328,45 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
 
-  # XRayAccessPolicy:
-  #   Type: AWS::IAM::Policy
-  #   Properties:
-  #     PolicyName: !Sub "${AWS::StackName}-XRayAccess"
-  #     PolicyDocument:
-  #       Version: "2012-10-17"
-  #       Statement:
-  #       - Effect: Allow
-  #         Action:
-  #           - xray:GetSamplingRules
-  #           - xray:GetSamplingTargets
-  #           - xray:PutTraceSegments
-  #         Resource: 
-  #         - "*"
-  #     Roles:
-  #       - !Ref StoryFunctionRole
+  CloudFrontOriginIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: 'origin identity'
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref StaticAssetsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt  CloudFrontOriginIdentity.Arn
+            Action: 's3:GetObject'
+            Resource: !Sub arn:aws:s3:::${StaticAssetsBucket}/*
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - DomainName: !Sub ${StaticAssetsBucket}.${AWS::Region}.amazonaws.com
+            Id: S3-private-bucket
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${CloudFrontOriginIdentity}
+        Enabled: 'true'
+        Comment: Some comment
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+          TargetOriginId: S3-private-bucket
+          ForwardedValues:
+            QueryString: 'false'
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy: redirect-to-https
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: 'true'
