@@ -4,4 +4,4 @@ phases:
     commands:
       - echo Copy Content
       - cd static
-      - aws s3 cp --recursive --exclude buildspec.yml * s3://"${StaticAssetsBucket}"/
+      - aws s3 cp --recursive --exclude buildspec.yml ./ s3://"${StaticAssetsBucket}"/
