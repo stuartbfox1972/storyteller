@@ -62,10 +62,11 @@ Resources:
               KeyType: "HASH"
           Projection:
             NonKeyAttributes:
+              - "ageRange"
+              - "author"
+              - "storyId"
               - "title"
               - "tags"
-              - "author"
-              - "ageRange"
               - "views"
             ProjectionType: "INCLUDE"
         - IndexName: "GroupStoriesByAgeRangeIndex"
@@ -74,9 +75,10 @@ Resources:
               KeyType: "HASH"
           Projection:
             NonKeyAttributes:
-              - "title"
-              - "tags"
               - "author"
+              - "storyId"
+              - "tags"
+              - "title"
               - "views"
             ProjectionType: "INCLUDE"
         - IndexName: "GroupStoriesByAuthorIndex"
@@ -85,9 +87,10 @@ Resources:
               KeyType: "HASH"
           Projection:
             NonKeyAttributes:
-              - "title"
-              - "tags"
               - "ageRange"
+              - "storyId"
+              - "tags"
+              - "title"
               - "views"
             ProjectionType: "INCLUDE"
 
@@ -260,6 +263,18 @@ Resources:
     Properties:
       ApiId: !Ref HttpApi
       RouteKey: "GET /api/v1.0/story/{id}"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref HttpApiAuthorizer
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref HttpStoryIntegration
+
+  HttpApiParagraphRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "GET /api/v1.0/story/{id}/{paragraph}"
       AuthorizationType: JWT
       AuthorizerId: !Ref HttpApiAuthorizer
       Target: !Join
