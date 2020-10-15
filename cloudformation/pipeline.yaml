@@ -227,7 +227,7 @@ Resources:
         BuildSpec: lambdas/buildspec.yml
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:4.0-20.06.15
+        Image: aws/codebuild/standard:4.0
         Type: LINUX_CONTAINER
       ServiceRole: !Ref CodeBuildServiceRole
 
@@ -242,7 +242,7 @@ Resources:
         BuildSpec: static/buildspec.yml
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/standard:4.0-20.06.15
+        Image: aws/codebuild/standard:4.0
         Type: LINUX_CONTAINER
       ServiceRole: !Ref CodeBuildServiceRole
 
