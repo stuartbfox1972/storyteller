@@ -21,7 +21,6 @@ Metadata:
       - Label:
           default: "Route53 Hosted Zone"
         Parameters:
-          - DebugFunctionBool
           - WebsiteName
           - APIName
           - DomainName
@@ -40,13 +39,6 @@ Parameters:
   GitHubUser:
     Type: String
     Default: stuartbfox1972
-  DebugFunctionBool:
-    Type: String
-    Description: Deploys a debug lambda function and apigateway route for debugging
-    AllowedValues:
-      - true
-      - false
-    Default: false
   HostedZone:
     Type: AWS::Route53::HostedZone::Id
     Description: Route53 Hosted Zone
@@ -306,7 +298,6 @@ Resources:
                 TemplatePath: "DownloadSource::cloudformation/infra.yaml"
                 ParameterOverrides: !Sub |
                   {
-                    "DebugFunctionBool": "${DebugFunctionBool}",
                     "HostedZone": "${HostedZone}",
                     "WebsiteName": "${WebsiteName}",
                     "DomainName": "${DomainName}",
