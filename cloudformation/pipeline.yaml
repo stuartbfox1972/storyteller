@@ -204,8 +204,13 @@ Resources:
           Value: !Sub ${AWS::StackName}
         - Key: "purpose"
           Value: "static-assets-bucket"
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeletePollyMP3After1Day
+            Prefix: "rendered/"
+            Status: "Enabled"
+            ExpirationInDays: 1
 
-  
   LambdaBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain

@@ -345,7 +345,6 @@ Resources:
           - Effect: Allow
             Principal:
               CanonicalUser: !GetAtt CloudFrontOriginIdentity.S3CanonicalUserId
-              #AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${CloudFrontOriginIdentity}'
             Action: 's3:GetObject'
             Resource: !Sub arn:aws:s3:::${StaticAssetsBucket}/*
 
