@@ -5,11 +5,8 @@ import os
 
 from boto3.dynamodb.conditions import Key, Attr
 from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core import patch_all
-patch_all()
-
-dynamodb = boto3.resource("dynamodb")
-table = dynamodb.Table(os.environ['STORIES_TABLE'])
+from aws_xray_sdk.core import patch
+patch(['boto3'])
 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
@@ -19,7 +16,15 @@ class DecimalEncoder(json.JSONEncoder):
             return list(o)
         return super(DecimalEncoder, self).default(o)
 
+@xray_recorder.capture("_connect")
+def _connect():
+  dynamodb = boto3.resource("dynamodb")
+  table = dynamodb.Table(os.environ['STORIES_TABLE'])
+  return table
+
+@xray_recorder.capture("story_handler")
 def story_handler(event, context):
+  table = _connect()
   if event['routeKey'] == "GET /api/v1.0/story":
     results=[]
     response = table.scan(
