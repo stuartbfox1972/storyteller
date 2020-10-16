@@ -13,8 +13,11 @@ do
                 mkdir -p package
                 cd package
                 pip install --no-compile -t ./ -r ../requirements.txt
+                zip -r9 ../"$dir"-"$LambdaVersion".zip .
                 cd ..
+                zip -g "$dir"-"$LambdaVersion".zip "$dir".py
+        else
+                zip -r "$dir"-"$LambdaVersion".zip ./
         fi
-        zip -r "$dir"-"$LambdaVersion".zip ./
         aws s3 cp "$dir"-"$LambdaVersion".zip s3://"${LambdaBucket}"/lambdas/"$dir"/"$dir"-"$LambdaVersion".zip
 done
