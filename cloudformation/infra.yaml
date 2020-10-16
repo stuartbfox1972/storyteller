@@ -310,7 +310,7 @@ Resources:
           Value: !Sub ${AWS::StackName}
       Handler: story.story_handler
       Runtime: python3.8
-      Timeout: 1
+      Timeout: 2
       TracingConfig:
         Mode: Active
       Role: !GetAtt StoryFunctionRole.Arn
