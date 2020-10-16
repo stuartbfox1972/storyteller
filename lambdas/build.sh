@@ -12,7 +12,7 @@ do
         then
                 mkdir -p package
                 cd package
-                pip install --system --no-compile -t ./ -r ../requirements.txt
+                pip install --no-compile -t ./ -r ../requirements.txt
                 cd ..
         fi
         zip -r "$dir"-"$LambdaVersion".zip ./
