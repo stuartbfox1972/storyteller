@@ -123,13 +123,23 @@ Resources:
           RequireUppercase: true
           TemporaryPasswordValidityDays: 1
 
-  UserPoolClient:
+  ApiUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties:
       ClientName: cognito-apigateway
       ExplicitAuthFlows:
         - ALLOW_USER_PASSWORD_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
+      UserPoolId: !Ref UserPool
+
+  FrontendUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: cognito-frontend
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
       UserPoolId: !Ref UserPool
 
   ## Route53 Config Section
@@ -193,7 +203,7 @@ Resources:
         - "$request.header.Authorization"
       JwtConfiguration:
         Audience:
-          - !Ref UserPoolClient
+          - !Ref ApiUserPoolClient
         Issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}"
 
   HttpApiStage:
@@ -229,8 +239,6 @@ Resources:
     Properties:
       ApiId: !Ref HttpApi
       RouteKey: "GET /api/v1.0/story"
-      AuthorizationType: JWT
-      AuthorizerId: !Ref HttpApiAuthorizer
       Target: !Join
         - '/'
         - - 'integrations'

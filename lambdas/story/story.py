@@ -16,13 +16,13 @@ class DecimalEncoder(json.JSONEncoder):
             return list(o)
         return super(DecimalEncoder, self).default(o)
 
-@xray_recorder.capture("_connect")
+#@xray_recorder.capture("_connect")
 def _connect():
   dynamodb = boto3.resource("dynamodb")
   table = dynamodb.Table(os.environ['STORIES_TABLE'])
   return table
 
-@xray_recorder.capture("story_handler")
+#@xray_recorder.capture("story_handler")
 def story_handler(event, context):
   table = _connect()
   if event['routeKey'] == "GET /api/v1.0/story":

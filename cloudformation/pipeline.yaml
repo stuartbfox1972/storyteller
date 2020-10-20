@@ -278,7 +278,7 @@ Resources:
               OutputArtifacts:
                 - Name: DownloadSource
               RunOrder: 1
-        - Name: DeployLambdaAndContent
+        - Name: DeployLambda
           Actions:
             - Name: ZipAndCopyLambdas
               ActionTypeId:
@@ -296,21 +296,6 @@ Resources:
                                         "value":"#{codepipeline.PipelineExecutionId}",
                                         "type":"PLAINTEXT"
                                        }]'
-              InputArtifacts:
-                - Name: DownloadSource
-              RunOrder: 2
-            - Name: CopyStaticContent
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Version: 1
-                Provider: CodeBuild
-              Configuration:
-                ProjectName: !Ref BuildAndCopyStaticContent
-                EnvironmentVariables: !Sub '[{"name": "StaticAssetsBucket",
-                                        "value":"${StaticAssetsBucket}",
-                                        "type":"PLAINTEXT"
-                                        }]'
               InputArtifacts:
                 - Name: DownloadSource
               RunOrder: 2
@@ -341,6 +326,26 @@ Resources:
                     "LambdaVersion": "#{codepipeline.PipelineExecutionId}",
                     "StaticAssetsBucket": "${StaticAssetsBucket}"
                   }
+        - Name: DeployStaticContent
+          Actions:
+            - Name: CopyStaticContent
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Ref BuildAndCopyStaticContent
+                EnvironmentVariables: !Sub '[{"name": "StaticAssetsBucket",
+                                        "value":"${StaticAssetsBucket}",
+                                        "type":"PLAINTEXT"
+                                        }, {"name": "StackName",
+                                        "value":"${AWS::StackName}",
+                                        "type":"PLAINTEXT"
+                                        }]'
+              InputArtifacts:
+                - Name: DownloadSource
+              RunOrder: 3
 
 Outputs:
   PipelineUrl:
