@@ -204,6 +204,7 @@ Resources:
       JwtConfiguration:
         Audience:
           - !Ref ApiUserPoolClient
+          - !Ref FrontendUserPoolClient
         Issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}"
 
   HttpApiStage:
