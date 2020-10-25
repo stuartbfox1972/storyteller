@@ -244,7 +244,7 @@ Resources:
       Target: !Join
         - '/'
         - - 'integrations'
-          - !Ref HttpStoryIntegration
+          - !Ref HttpDebugIntegration
 
   HttpApiStoriesRoute:
     Type: AWS::ApiGatewayV2::Route
@@ -323,7 +323,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
       Policies:
-      - PolicyName: root
+      - PolicyName: logsanddynamodb
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -334,6 +334,15 @@ Resources:
             Resource: 
               - arn:aws:logs:*:*:*
               - !GetAtt StoriesTable.Arn
+      - PolicyName: getaccountsettings
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - lambda:GetAccountSettings
+            Resource: 
+              - "*"
 
   StoryFunction:
     Type: AWS::Lambda::Function
