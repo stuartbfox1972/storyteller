@@ -1,29 +1,38 @@
-import boto3
+""" Handle all story related function """
 import decimal
+import logging
 import json
 import os
+import boto3
 
 from boto3.dynamodb.conditions import Key, Attr
 from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core import patch
-patch(['boto3'])
+from aws_xray_sdk.core import patch_all
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+patch_all()
+
+client = boto3.client('lambda')
+client.get_account_settings()
 
 class DecimalEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, decimal.Decimal):
-            return str(o)
-        if isinstance(o, set):
-            return list(o)
-        return super(DecimalEncoder, self).default(o)
+  """Some funky magic from StackOverflow"""
+  def default(self, o):
+    if isinstance(o, decimal.Decimal):
+      return str(o)
+    if isinstance(o, set):
+      return list(o)
+    return super(DecimalEncoder, self).default(o)
 
-#@xray_recorder.capture("_connect")
 def _connect():
+  """Connect to DynamoDB """
   dynamodb = boto3.resource("dynamodb")
   table = dynamodb.Table(os.environ['STORIES_TABLE'])
   return table
 
-#@xray_recorder.capture("story_handler")
 def story_handler(event, context):
+  """Entry point """
   table = _connect()
   if event['routeKey'] == "GET /api/v1.0/story":
     results=[]
@@ -34,42 +43,51 @@ def story_handler(event, context):
         )
 
     for i in response['Items']:
-        results.append(i)
-    
+      results.append(i)
+
     return json.dumps(results, indent=4, cls=DecimalEncoder)
-  elif event['routeKey'] == "GET /api/v1.0/story/{id}":
-    storyId = "STORY#" + event['pathParameters']['id']
-    result = table.get_item(Key={'PK': storyId, 'SK': "DETAILS"},
-                            ProjectionExpression="ageRange,author,opening,publishDate,storyId,tags,title,#v",
+
+  if event['routeKey'] == "GET /api/v1.0/story/{id}":
+    story_id = "STORY#" + event['pathParameters']['id']
+    result = table.get_item(Key={'PK': story_id, 'SK': "DETAILS"},
+                            ProjectionExpression="ageRange, \
+                                                  author, \
+                                                  opening, \
+                                                  publishDate, \
+                                                  storyId, \
+                                                  tags, \
+                                                  title, \
+                                                  #v",
                             ExpressionAttributeNames={'#v': 'views'}
                            )
-                           
+
     if 'Item' in result:
       return json.dumps(result['Item'], indent=4, cls=DecimalEncoder)
-    else:
-      message = prepResponse('{"message": "Unknown story"}', 404)
-      return message
 
-  elif event['routeKey'] == "GET /api/v1.0/story/{id}/{paragraph}":
-    storyId = "STORY#" + event['pathParameters']['id']
-    paragraphId = "PARAGRAPH#" + event['pathParameters']['paragraph']
-    result = table.get_item(Key={'PK': storyId, 'SK': paragraphId},
+    message = prep_response('{"message": "Unknown story"}', 404)
+    return message
+
+  if event['routeKey'] == "GET /api/v1.0/story/{id}/{paragraph}":
+    story_id = "STORY#" + event['pathParameters']['id']
+    paragraph_id = "PARAGRAPH#" + event['pathParameters']['paragraph']
+    result = table.get_item(Key={'PK': story_id, 'SK': paragraph_id},
                             ProjectionExpression="body,choices,paragraphId,storyId"
                            )
-                           
+
     if 'Item' in result:
       return json.dumps(result['Item'], indent=4, cls=DecimalEncoder)
-    else:
-      message = prepResponse('{"message": "Unknown paragraph"}', 404)
-      return message
-  else:
-      message = prepResponse('{"message":"Unsupported Operation"}', 405)
-      return message
-      
-def prepResponse(body, status):
-    message = {
-        "isBase64Encoded": "false",
-        "statusCode": status,
-        "body": body
-    }
+
+    message = prep_response('{"message": "Unknown paragraph"}', 404)
     return message
+
+  message = prep_response('{"message":"Unsupported Operation"}', 405)
+  return message
+
+def prep_response(body, status):
+  """Prepare a response """
+  message = {
+    "isBase64Encoded": "false",
+    "statusCode": status,
+    "body": body
+  }
+  return message
