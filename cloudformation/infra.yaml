@@ -368,7 +368,7 @@ Resources:
       Tags:
         - Key: "stack-name"
           Value: !Sub ${AWS::StackName}
-      RoleName: !Sub "${AWS::StackName}-StoryFunctionRole"
+      RoleName: !Sub "${AWS::StackName}-DebugFunctionRole"
       AssumeRolePolicyDocument:
         Statement:
           - Action:
