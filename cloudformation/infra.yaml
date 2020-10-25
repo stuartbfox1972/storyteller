@@ -396,9 +396,7 @@ Resources:
           Value: !Sub ${AWS::StackName}
       Handler: debug.debug_handler
       Runtime: python3.8
-      Timeout: 2
-      TracingConfig:
-        Mode: Active
+      Timeout: 1
       Role: !GetAtt DebugFunctionRole.Arn
       Code:
         S3Bucket: !Sub ${LambdaBucket}
