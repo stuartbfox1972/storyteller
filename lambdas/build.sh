@@ -14,7 +14,7 @@ do
         then
                 mkdir -p package
                 cd package
-                pip install --no-deps -q --no-compile -t ./ -r ../requirements.txt
+                pip install --no-deps --no-compile -t ./ -r ../requirements.txt
                 zip -q -r9 ../"$ZIP".zip .
                 cd ..
                 zip -q -g "$ZIP".zip "$dir".py
