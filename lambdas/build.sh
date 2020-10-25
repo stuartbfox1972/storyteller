@@ -9,17 +9,17 @@ ROOT=$(pwd)
 for dir in $(find . -maxdepth 1 -type d | sed -e 's/\.\///g'|grep -v ^\\.)
 do
         cd ${ROOT}/"$dir";
-        ZIP="$dir"-"$LambdaVersion".zip
+        ZIP="$dir"-"$LambdaVersion"
         if [ -f requirements.txt ];
         then
                 mkdir -p package
                 cd package
                 pip install -q --no-compile -t ./ -r ../requirements.txt
-                zip -q -r9 ../"$dir"-"$LambdaVersion".zip .
+                zip -q -r9 ../"$ZIP".zip .
                 cd ..
-                zip -q -g "$ZIP" "$dir".py
+                zip -q -g "$ZIP".zip "$dir".py
         else
                 zip -q -r "$ZIP".zip ./
         fi
-        aws s3 cp "$dir"-"$LambdaVersion".zip s3://"${LambdaBucket}"/lambdas/"$dir"/"$ZIP"
+        aws s3 cp "$ZIP".zip s3://"${LambdaBucket}"/lambdas/"$dir"/"$ZIP".zip
 done
