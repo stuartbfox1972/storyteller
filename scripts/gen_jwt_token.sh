@@ -13,8 +13,7 @@ else
     REGION=$5
 fi
 
-CLIENTID=$(aws --region ${REGION} cloudformation describe-stack-resource --stack-name ${STACK} --logical-resource-id UserPoolClient --query "StackResourceDetail.PhysicalResourceId" --output text)
-
+CLIENTID=$(aws --region ${REGION} cloudformation describe-stack-resource --stack-name ${STACK} --logical-resource-id FrontendUserPoolClient --query "StackResourceDetail.PhysicalResourceId" --output text)
 
 aws --region ${REGION} cognito-idp initiate-auth \
     --client-id ${CLIENTID} \

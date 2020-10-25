@@ -341,7 +341,7 @@ Resources:
       Tags:
         - Key: "stack-name"
           Value: !Sub ${AWS::StackName}
-      Handler: story.story_hwandler
+      Handler: story.story_handler
       Runtime: python3.8
       Timeout: 2
       TracingConfig:

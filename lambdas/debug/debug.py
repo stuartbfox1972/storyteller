@@ -4,7 +4,7 @@ import json
 import pkgutil
 import sys
 
-def debug(event, context):
+def debug_handler(event, context):
   """ Entry point """
   mods = []
   for p in pkgutil.iter_modules():
@@ -16,6 +16,4 @@ def debug(event, context):
              }
 
   return json.dumps(response)
-
-if __name__ == "__main__":
-  print(debug('{"name":"bob"}', '{"age":"21"}'))
+  
