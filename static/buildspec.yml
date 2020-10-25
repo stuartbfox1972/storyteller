@@ -3,4 +3,4 @@ phases:
   build:
     commands:
       - chmod 0755 ./static/build.sh
-      - /bin/bash -x ./static/build.sh ${AWS::StackName} ${StaticAssetsBucket}
+      - /bin/bash -x ./static/build.sh ${StackName} ${StaticAssetsBucket}
