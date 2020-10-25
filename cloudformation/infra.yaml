@@ -368,7 +368,7 @@ Resources:
       Tags:
         - Key: "stack-name"
           Value: !Sub ${AWS::StackName}
-      RoleName: !Sub "${AWS::StackName}-DebugFunctionRole"
+      RoleName: !Sub "${AWS::StackName}-StoryFunctionRole"
       AssumeRolePolicyDocument:
         Statement:
           - Action:
@@ -388,7 +388,7 @@ Resources:
             Resource: 
               - arn:aws:logs:*:*:*
 
-    DebugFunction:
+  DebugFunction:
     Type: AWS::Lambda::Function
     Properties:
       Tags:
