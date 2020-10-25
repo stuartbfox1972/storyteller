@@ -234,6 +234,18 @@ Resources:
       ApiId: !Ref HttpApi
       Stage: !Ref HttpApiStage
 
+  HttpDebugRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "GET /api/v1.0/debug"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref HttpApiAuthorizer
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref HttpStoryIntegration
+
   HttpApiStoriesRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
@@ -280,6 +292,19 @@ Resources:
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StoryFunction.Arn}/invocations
 
+  HttpDebugIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      Description: Debug Integration
+      PayloadFormatVersion: 2.0
+      IntegrationType: AWS_PROXY
+      TimeoutInMillis: 500
+      IntegrationUri: 
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DebugFunction.Arn}/invocations
+
+
   StoryFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -316,7 +341,7 @@ Resources:
       Tags:
         - Key: "stack-name"
           Value: !Sub ${AWS::StackName}
-      Handler: story.story_handler
+      Handler: story.story_hwandler
       Runtime: python3.8
       Timeout: 2
       TracingConfig:
@@ -333,6 +358,56 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !Ref StoryFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
+
+  DebugFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
+      RoleName: !Sub "${AWS::StackName}-DebugFunctionRole"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - logs:*
+            Resource: 
+              - arn:aws:logs:*:*:*
+
+    DebugFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
+      Handler: debug.debug_handler
+      Runtime: python3.8
+      Timeout: 2
+      TracingConfig:
+        Mode: Active
+      Role: !GetAtt DebugFunctionRole.Arn
+      Code:
+        S3Bucket: !Sub ${LambdaBucket}
+        S3Key: !Sub lambdas/debug/debug-${LambdaVersion}.zip
+
+  DebugFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref DebugFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
