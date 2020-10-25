@@ -21,5 +21,5 @@ do
         else
                 zip -q -r "$ZIP".zip ./
         fi
-        echo aws s3 cp "$dir"-"$LambdaVersion".zip s3://"${LambdaBucket}"/lambdas/"$dir"/"$ZIP"
+        aws s3 cp "$dir"-"$LambdaVersion".zip s3://"${LambdaBucket}"/lambdas/"$dir"/"$ZIP"
 done
