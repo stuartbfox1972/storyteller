@@ -15,6 +15,7 @@ do
                 mkdir -p package
                 cd package
                 pip install --no-deps --no-compile -t ./ -r ../requirements.txt
+                rm -r $(find . -name *dist-info)
                 zip -q -r9 ../"$ZIP".zip .
                 cd ..
                 zip -q -g "$ZIP".zip "$dir".py
