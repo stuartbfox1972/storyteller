@@ -13,9 +13,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 patch_all()
 
-client = boto3.client('lambda')
-client.get_account_settings()
-
 class DecimalEncoder(json.JSONEncoder):
   """Some funky magic from StackOverflow"""
   def default(self, o):

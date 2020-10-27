@@ -3,7 +3,7 @@
 ## Collections
 |PK|SK|ATTR|
 |--|--|--|
-|STORY#storyId|DETAILS|storyId,GSIPK1,publishDate,author,ageRange,title,tags[],intro,lang|
+|STORY#storyId|STORY#DETAILS|storyId,GSIPK1,publishDate,author,ageRange,title,tags[],intro,lang|
 ||PARAGRAPH#number|body,next,previous|
 ||REVIEW#reviewId|displayName,rating,comments|
 |USER#userId|PROFILE|displayName,email,dob,langs[]|
@@ -15,7 +15,7 @@
 ### ListOfStories
 |PK|SK|ATTR|
 |--|--|--|
-|GSIPK1|storyId, ageRange, author, views, tags, title|
+|STORY#DETAILS|views, ageRange, author, storyId, tags, title|
 
 ### GroupStoriesByAgeRangeIndex
 |PK|ATTR|

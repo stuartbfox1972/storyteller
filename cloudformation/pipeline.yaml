@@ -32,7 +32,7 @@ Parameters:
     Default: storyteller
   GitHubBranch:
     Type: String
-    Default: master
+    Default: main
   GitHubToken:
     Type: String
     NoEcho: true

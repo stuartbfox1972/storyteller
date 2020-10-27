@@ -14,7 +14,7 @@
             "PutRequest": {
                 "Item": {
                     "PK": {"S":"STORY#0"},
-                    "SK": {"S":"DETAILS"},
+                    "SK": {"S":"STORY#DETAILS"},
                     "storyId": {"N": "0"},
                     "publishDate": {"N":"1600566193"},
                     "author": {"S":"System"},
@@ -31,7 +31,7 @@
             "PutRequest": {
                 "Item": {
                     "PK": {"S":"STORY#1"},
-                    "SK": {"S":"DETAILS"},
+                    "SK": {"S":"STORY#DETAILS"},
                     "storyId": {"N": "1"},
                     "publishDate": {"N":"1600569193"},
                     "author": {"S":"System"},
@@ -48,7 +48,7 @@
             "PutRequest": {
                 "Item": {
                     "PK": {"S":"STORY#2"},
-                    "SK": {"S":"DETAILS"},
+                    "SK": {"S":"STORY#DETAILS"},
                     "storyId": {"N": "2"},
                     "publishDate": {"N":"1600569193"},
                     "author": {"S":"System"},
