@@ -21,3 +21,4 @@ def _connect():
 def profile_handler(event, context):
   """Entry point """
   table = _connect()
+  return "OK"
