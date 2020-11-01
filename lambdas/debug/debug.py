@@ -34,7 +34,7 @@ def debug_handler(event, context):
               'EVENT': event,
               'CONT': cxt,
               'MODS': mods,
-              'SUB': event.requestContext.authorizer.jwt.claims['sub']
+              'SUB': event['requestContext']['authorizer']['jwt']['claims']['sub']
              }
 
   return json.dumps(response)
