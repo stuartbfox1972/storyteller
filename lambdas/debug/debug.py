@@ -33,8 +33,8 @@ def debug_handler(event, context):
   response = {'ENV': dict(**os.environ),
               'EVENT': event,
               'CONT': cxt,
-              'MODS': mods
-              #'SUB': event.requestContext.authorizer.jwt.claims['sub']
+              'MODS': mods,
+              'SUB': event.requestContext.authorizer.jwt.claims['sub']
              }
 
   return json.dumps(response)
