@@ -311,7 +311,7 @@ Resources:
       Description: Story Integration
       PayloadFormatVersion: 2.0
       IntegrationType: AWS_PROXY
-      TimeoutInMillis: 500
+      TimeoutInMillis: 1500
       IntegrationUri:
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StoryFunction.Arn}/invocations
@@ -323,7 +323,7 @@ Resources:
       Description: Debug Integration
       PayloadFormatVersion: 2.0
       IntegrationType: AWS_PROXY
-      TimeoutInMillis: 500
+      TimeoutInMillis: 1500
       IntegrationUri: 
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DebugFunction.Arn}/invocations
@@ -335,7 +335,7 @@ Resources:
       Description: Profile Integration
       PayloadFormatVersion: 2.0
       IntegrationType: AWS_PROXY
-      TimeoutInMillis: 500
+      TimeoutInMillis: 1500
       IntegrationUri: 
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProfileFunction.Arn}/invocations
@@ -387,7 +387,7 @@ Resources:
           Value: !Sub ${AWS::StackName}
       Handler: story.story_handler
       Runtime: python3.8
-      Timeout: 2
+      Timeout: 1
       TracingConfig:
         Mode: Active
       Role: !GetAtt DDBXrayFunctionRole.Arn
@@ -488,7 +488,7 @@ Resources:
           Value: !Sub ${AWS::StackName}
       Handler: profile.profile_handler
       Runtime: python3.8
-      Timeout: 2
+      Timeout: 1
       TracingConfig:
         Mode: Active
       Role: !GetAtt DDBXrayFunctionRole.Arn
