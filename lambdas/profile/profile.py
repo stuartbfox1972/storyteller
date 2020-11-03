@@ -41,5 +41,5 @@ def profile_handler(event, context):
     profiledata = json.loads(event['body'])
     profiledata.update({'PK': 'USER#' + sub,
                         'SK': "PROFILE"})
-    table.update_item(Key=profiledata)
+    table.put_item(Item=profiledata)
     return '{"status":"profile_updated"}'
