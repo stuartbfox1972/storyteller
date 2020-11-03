@@ -311,7 +311,7 @@ Resources:
       Description: Story Integration
       PayloadFormatVersion: 2.0
       IntegrationType: AWS_PROXY
-      TimeoutInMillis: 1500
+      TimeoutInMillis: 5000
       IntegrationUri:
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StoryFunction.Arn}/invocations
@@ -323,7 +323,7 @@ Resources:
       Description: Debug Integration
       PayloadFormatVersion: 2.0
       IntegrationType: AWS_PROXY
-      TimeoutInMillis: 1500
+      TimeoutInMillis: 5000
       IntegrationUri: 
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DebugFunction.Arn}/invocations
