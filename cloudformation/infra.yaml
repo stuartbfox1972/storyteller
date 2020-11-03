@@ -387,7 +387,7 @@ Resources:
           Value: !Sub ${AWS::StackName}
       Handler: story.story_handler
       Runtime: python3.8
-      Timeout: 1
+      Timeout: 2
       TracingConfig:
         Mode: Active
       Role: !GetAtt DDBXrayFunctionRole.Arn
@@ -440,7 +440,7 @@ Resources:
           Value: !Sub ${AWS::StackName}
       Handler: debug.debug_handler
       Runtime: python3.8
-      Timeout: 1
+      Timeout: 2
       Role: !GetAtt DebugFunctionRole.Arn
       Code:
         S3Bucket: !Sub ${LambdaBucket}
@@ -488,7 +488,7 @@ Resources:
           Value: !Sub ${AWS::StackName}
       Handler: profile.profile_handler
       Runtime: python3.8
-      Timeout: 1
+      Timeout: 2
       TracingConfig:
         Mode: Active
       Role: !GetAtt DDBXrayFunctionRole.Arn
