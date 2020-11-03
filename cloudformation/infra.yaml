@@ -328,13 +328,13 @@ Resources:
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProfileFunction.Arn}/invocations
 
-  StoryFunctionRole:
+  DDBXrayFunctionRole:
     Type: AWS::IAM::Role
     Properties:
       Tags:
         - Key: "stack-name"
           Value: !Sub ${AWS::StackName}
-      RoleName: !Sub "${AWS::StackName}-StoryFunctionRole"
+      RoleName: !Sub "${AWS::StackName}-FullFunctionRole"
       AssumeRolePolicyDocument:
         Statement:
           - Action:
@@ -378,7 +378,7 @@ Resources:
       Timeout: 2
       TracingConfig:
         Mode: Active
-      Role: !GetAtt StoryFunctionRole.Arn
+      Role: !GetAtt DDBXrayFunctionRole.Arn
       Environment:
         Variables:
           STORIES_TABLE: !Ref StoriesTable
@@ -394,32 +394,7 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
 
-  DebugFunctionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      Tags:
-        - Key: "stack-name"
-          Value: !Sub ${AWS::StackName}
-      RoleName: !Sub "${AWS::StackName}-DebugFunctionRole"
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action:
-            - sts:AssumeRole
-            Effect: Allow
-            Principal:
-              Service:
-              - lambda.amazonaws.com
-      Policies:
-      - PolicyName: root
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action:
-              - logs:*
-            Resource: 
-              - arn:aws:logs:*:*:*
-
+  
   DebugFunction:
     Type: AWS::Lambda::Function
     Properties:
@@ -479,7 +454,7 @@ Resources:
       Timeout: 2
       TracingConfig:
         Mode: Active
-      Role: !GetAtt ProfileFunctionRole.Arn
+      Role: !GetAtt DDBXrayFunctionRole.Arn
       Environment:
         Variables:
           STORIES_TABLE: !Ref StoriesTable
