@@ -291,6 +291,18 @@ Resources:
         - '/'
         - - 'integrations'
           - !Ref HttpProfileIntegration
+
+  HttpApiProfileUpdateRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "POST /api/v1.0/profile"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref HttpApiAuthorizer
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref HttpProfileIntegration
   
   HttpStoryIntegration:
     Type: AWS::ApiGatewayV2::Integration
