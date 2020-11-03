@@ -328,7 +328,6 @@ Resources:
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProfileFunction.Arn}/invocations
 
-
   StoryFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -395,6 +394,54 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
 
+  DebugFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
+      RoleName: !Sub "${AWS::StackName}-DebugFunctionRole"
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - logs:*
+            Resource: 
+              - arn:aws:logs:*:*:*
+
+  DebugFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Tags:
+        - Key: "stack-name"
+          Value: !Sub ${AWS::StackName}
+      Handler: debug.debug_handler
+      Runtime: python3.8
+      Timeout: 1
+      Role: !GetAtt DebugFunctionRole.Arn
+      Code:
+        S3Bucket: !Sub ${LambdaBucket}
+        S3Key: !Sub lambdas/debug/debug-${LambdaVersion}.zip
+
+  DebugFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref DebugFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
+
   ProfileFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -429,8 +476,13 @@ Resources:
           Value: !Sub ${AWS::StackName}
       Handler: profile.profile_handler
       Runtime: python3.8
-      Timeout: 1
+      Timeout: 2
+      TracingConfig:
+        Mode: Active
       Role: !GetAtt ProfileFunctionRole.Arn
+      Environment:
+        Variables:
+          STORIES_TABLE: !Ref StoriesTable
       Code:
         S3Bucket: !Sub ${LambdaBucket}
         S3Key: !Sub lambdas/profile/profile-${LambdaVersion}.zip
