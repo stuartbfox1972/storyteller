@@ -22,6 +22,8 @@ def profile_handler(event, context):
   """ Entry point """
   table = _connect()
   sub = event['requestContext']['authorizer']['jwt']['claims']['sub']
+  username = event['requestContext']['authorizer']['jwt']['claims']['username']
+
   if event['routeKey'] == "GET /api/v1.0/profile":
     result = table.get_item(Key={'PK': 'USER#' + sub,
                                    'SK': "PROFILE"})
@@ -29,4 +31,11 @@ def profile_handler(event, context):
       userdata = result['Item']
       return json.dumps(userdata)
 
-    return '{"status":"user not found"}'
+    table.put_item(Item={'PK': "USER#" + sub,
+                         'SK': "PROFILE",
+                         'username': username})
+                         
+    return '{"status":"new_profile_created"}'
+
+  if event['routeKey'] == "POST /api/v1.0/profile":
+    return json.dumps(event)
