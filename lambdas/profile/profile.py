@@ -26,16 +26,16 @@ def profile_handler(event, context):
 
   if event['routeKey'] == "GET /api/v1.0/profile":
     result = table.get_item(Key={'PK': 'USER#' + sub,
-                                   'SK': "PROFILE"})
-    if 'Item' in result:
-      userdata = result['Item']
-      return json.dumps(userdata)
-
-    table.put_item(Item={'PK': "USER#" + sub,
-                         'SK': "PROFILE",
-                         'username': username})
-
-    return '{"status":"new_profile_created"}'
+                                 'SK': "PROFILE"})
+    if 'Item' not in result:
+      table.put_item(Item={'PK': "USER#" + sub,
+                           'SK': "PROFILE",
+                           'username': username})
+    
+    userdata = result['Item']
+    userdata.pop('PK')
+    userdata.pop('SK')
+    return json.dumps(userdata)
 
   if event['routeKey'] == "POST /api/v1.0/profile":
     profiledata = json.loads(event['body'])
