@@ -95,7 +95,6 @@ Resources:
     Properties:
       UserPoolTags:
         stack-name: !Sub ${AWS::StackName}
-      #UserPoolName: !Sub ${AWS::StackName}-UserPool
       AliasAttributes:
         - email
       Schema:
@@ -280,6 +279,18 @@ Resources:
         - '/'
         - - 'integrations'
           - !Ref HttpStoryIntegration
+
+  HttpApiProfileRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "GET /api/v1.0/profile"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref HttpApiAuthorizer
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref HttpProfileIntegration
   
   HttpStoryIntegration:
     Type: AWS::ApiGatewayV2::Integration
@@ -289,7 +300,7 @@ Resources:
       PayloadFormatVersion: 2.0
       IntegrationType: AWS_PROXY
       TimeoutInMillis: 500
-      IntegrationUri: 
+      IntegrationUri:
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${StoryFunction.Arn}/invocations
 
@@ -304,6 +315,18 @@ Resources:
       IntegrationUri: 
         Fn::Sub:
             arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DebugFunction.Arn}/invocations
+
+  HttpProfileIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref HttpApi
+      Description: Profile Integration
+      PayloadFormatVersion: 2.0
+      IntegrationType: AWS_PROXY
+      TimeoutInMillis: 500
+      IntegrationUri: 
+        Fn::Sub:
+            arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ProfileFunction.Arn}/invocations
 
 
   StoryFunctionRole:
@@ -372,13 +395,13 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
 
-  DebugFunctionRole:
+  ProfileFunctionRole:
     Type: AWS::IAM::Role
     Properties:
       Tags:
         - Key: "stack-name"
           Value: !Sub ${AWS::StackName}
-      RoleName: !Sub "${AWS::StackName}-DebugFunctionRole"
+      RoleName: !Sub "${AWS::StackName}-ProfileFunctionRole"
       AssumeRolePolicyDocument:
         Statement:
           - Action:
@@ -398,24 +421,24 @@ Resources:
             Resource: 
               - arn:aws:logs:*:*:*
 
-  DebugFunction:
+  ProfileFunction:
     Type: AWS::Lambda::Function
     Properties:
       Tags:
         - Key: "stack-name"
           Value: !Sub ${AWS::StackName}
-      Handler: debug.debug_handler
+      Handler: profile.profile_handler
       Runtime: python3.8
       Timeout: 1
-      Role: !GetAtt DebugFunctionRole.Arn
+      Role: !GetAtt ProfileFunctionRole.Arn
       Code:
         S3Bucket: !Sub ${LambdaBucket}
-        S3Key: !Sub lambdas/debug/debug-${LambdaVersion}.zip
+        S3Key: !Sub lambdas/profile/profile-${LambdaVersion}.zip
 
-  DebugFunctionPermission:
+  ProfileFunctionPermission:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !Ref DebugFunction
+      FunctionName: !Ref ProfileFunction
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${HttpApi}/*
