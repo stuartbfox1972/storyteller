@@ -40,6 +40,7 @@ def profile_handler(event, context):
   if event['routeKey'] == "POST /api/v1.0/profile":
     profiledata = json.loads(event['body'])
     profiledata.update({'PK': 'USER#' + sub,
-                        'SK': "PROFILE"})
+                        'SK': "PROFILE",
+                        'username': username})
     table.put_item(Item=profiledata)
     return '{"status":"profile_updated"}'
