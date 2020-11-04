@@ -18,6 +18,38 @@ def _connect():
   table = dynamodb.Table(os.environ['STORIES_TABLE'])
   return table
 
+def _lookup(sub, table):
+  result = table.get_item(Key={'PK': 'USER#' + sub,
+                               'SK': "PROFILE"})
+  return result
+
+def _update(sub, username, table, event):
+  result = _lookup(sub, table)
+  if 'Item' not in result:
+    r = _create_get(sub, username, table)
+    return r
+
+  profiledata = json.loads(event['body'])
+  profiledata.update({'PK': 'USER#' + sub,
+                      'SK': "PROFILE",
+                      'username': username})
+  table.put_item(Item=profiledata)
+  return '{"status":"profile_updated"}'
+
+def _create_get(sub, username, table):
+  result = _lookup(sub, table)
+
+  if 'Item' not in result:
+    table.put_item(Item={'PK': "USER#" + sub,
+                         'SK': "PROFILE",
+                         'username': username})
+    return {"status": "profile_created"}
+    
+  userdata = result['Item']
+  userdata.pop('PK')
+  userdata.pop('SK')
+  return json.dumps(userdata)
+
 def profile_handler(event, context):
   """ Entry point """
   table = _connect()
@@ -25,22 +57,8 @@ def profile_handler(event, context):
   username = event['requestContext']['authorizer']['jwt']['claims']['username']
 
   if event['routeKey'] == "GET /api/v1.0/profile":
-    result = table.get_item(Key={'PK': 'USER#' + sub,
-                                 'SK': "PROFILE"})
-    if 'Item' not in result:
-      table.put_item(Item={'PK': "USER#" + sub,
-                           'SK': "PROFILE",
-                           'username': username})
-    
-    userdata = result['Item']
-    userdata.pop('PK')
-    userdata.pop('SK')
-    return json.dumps(userdata)
+    return _create_get(sub, username, table)
 
   if event['routeKey'] == "POST /api/v1.0/profile":
-    profiledata = json.loads(event['body'])
-    profiledata.update({'PK': 'USER#' + sub,
-                        'SK': "PROFILE",
-                        'username': username})
-    table.put_item(Item=profiledata)
-    return '{"status":"profile_updated"}'
+    return _update(sub, username, table, event)
+
