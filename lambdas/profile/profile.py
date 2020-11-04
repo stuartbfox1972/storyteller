@@ -24,11 +24,6 @@ def _lookup(sub, table):
   return result
 
 def _update(sub, username, table, event):
-  result = _lookup(sub, table)
-  if 'Item' not in result:
-    r = _create_get(sub, username, table)
-    return r
-
   profiledata = json.loads(event['body'])
   profiledata.update({'PK': 'USER#' + sub,
                       'SK': "PROFILE",
