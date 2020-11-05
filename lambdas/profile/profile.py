@@ -43,7 +43,7 @@ def _update(sub, username, table, event):
 
 def _get_all_progress(sub, table):
   results = table.query(
-    KeyConditionExpression='PK = :pk AND begins_with (SK, PROGRESS#)',
+    KeyConditionExpression="PK = :pk AND begins_with (SK, 'PROGRESS#')",
     ExpressionAttributeValues={
       ':pk': {'S': 'USER#' + sub}
     }
