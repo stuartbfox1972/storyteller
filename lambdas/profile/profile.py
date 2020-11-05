@@ -1,18 +1,12 @@
 """ Handle all profile related function """
-import logging
 import json
 import os
 import boto3
 
 from datetime import datetime
-
-#from boto3.dynamodb.conditions import Key, Attr
-#from aws_xray_sdk.core import xray_recorder
-#from aws_xray_sdk.core import patch_all
-#patch_all()
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
+patch_all()
 
 def _clean_results(result):
   data = result['Item']
