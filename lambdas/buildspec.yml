@@ -1,8 +1,5 @@
 version: 0.2
 phases:
-  install:
-    commands:
-      - pip install --upgrade pip
   build:
     commands:
       - chmod 0755 ./lambdas/build.sh
