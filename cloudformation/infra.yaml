@@ -327,6 +327,18 @@ Resources:
         - '/'
         - - 'integrations'
           - !Ref HttpProfileIntegration
+
+  HttpApiPostProgressRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "POST /api/v1.0/profile/progress/{storyId}"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref HttpApiAuthorizer
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref HttpProfileIntegration
   
   HttpStoryIntegration:
     Type: AWS::ApiGatewayV2::Integration
