@@ -4,6 +4,8 @@ import json
 import os
 import boto3
 
+from datetime import datetime
+
 #from boto3.dynamodb.conditions import Key, Attr
 #from aws_xray_sdk.core import xray_recorder
 #from aws_xray_sdk.core import patch_all
@@ -11,6 +13,12 @@ import boto3
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+def _clean_results(result):
+  data = result['Item']
+  data.pop('PK')
+  data.pop('SK')
+  return data
 
 def _connect():
   """ Connect to DynamoDB """
@@ -28,10 +36,7 @@ def _create_get(sub, username, table):
                          'username': username})
     return {"status": "profile_created"}
 
-  userdata = result['Item']
-  userdata.pop('PK')
-  userdata.pop('SK')
-  return json.dumps(userdata)
+  return json.dumps(_clean_results(result))
 
 def _update(sub, username, table, event):
   profiledata = json.loads(event['body'])
@@ -58,17 +63,34 @@ def _get_all_progress(sub, table):
 
   return
 
-#def _get_story_progress(sub, table, event):
-#  return
+def _get_story_progress(sub, table, story_id):
+  result = table.get_item(Key={'PK': 'USER#' + sub,
+                               'SK': "PROGRESS#" + story_id})
 
-#def _update_story_progress(sub, table, event):
-#  return
+  if 'Item' not in result:
+    return {"status": "no_progress_tracked"}
+
+  message = _clean_results(result)
+  return json.dumps(message)
+
+def _update_story_progress(sub, table, event):
+  now = datetime.now()
+  progressdata = json.loads(event['body'])
+  progressdata.update({'PK': 'USER#' + sub,
+                       'SK': "PROGRESS#" + story_id,
+                       'timestamp': dt_string})
+  table.put_item(Item=profiledata)
+  return '{"status":"profile_updated"}'
+                      
+  table.put_item(Item=profiledata)
+  return '{"status":"progress_updated"}'
 
 def profile_handler(event, context):
   """ Entry point """
   table = _connect()
   sub = event['requestContext']['authorizer']['jwt']['claims']['sub']
   username = event['requestContext']['authorizer']['jwt']['claims']['username']
+  
 
   if event['routeKey'] == "GET /api/v1.0/profile":
     return _create_get(sub, username, table)
@@ -79,8 +101,9 @@ def profile_handler(event, context):
   if event['routeKey'] == "GET /api/v1.0/profile/progress":
     return _get_all_progress(sub, table)
 
-  #if event['routeKey'] == "GET /api/v1.0/profile/progress/{storyId}":
-  #  return _get_story_progress(sub, table, event)
+  if event['routeKey'] == "GET /api/v1.0/profile/progress/{storyId}":
+    story_id = event['pathParameters']['storyId']
+    return _get_story_progress(sub, table, story_id)
 
-  #if event['routeKey'] == "POST /api/v1.0/profile/progress/{storyId}":
-  #  return _update_story_progress(sub, table, event)
+  if event['routeKey'] == "POST /api/v1.0/profile/progress/{storyId}":
+    return _update_story_progress(sub, table, event)
