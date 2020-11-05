@@ -45,7 +45,7 @@ def story_handler(event, context):
     return json.dumps(results, indent=4, cls=DecimalEncoder)
 
   if event['routeKey'] == "GET /api/v1.0/story/{storyId}":
-    story_id = "STORY#" + event['pathParameters']['id']
+    story_id = "STORY#" + event['pathParameters']['storyId']
     result = table.get_item(Key={'PK': story_id, 'SK': "DETAILS"},
                             ProjectionExpression="ageRange, \
                                                   author, \
