@@ -43,14 +43,18 @@ def _update(sub, username, table, event):
 
 def _get_all_progress(sub, table):
   results = table.query(
-    KeyConditionExpression='PK = :pk AND begins_with ( SK , :sk )',
+    KeyConditionExpression='#pk = :pk AND begins_with ( #sk , :sk )',
+    ExpressionAttributeNames ={
+      '#pk': 'PK',
+      '#sk': 'SK'
+    },
     ExpressionAttributeValues={
-      ':pk': {'S': 'USER#' + sub},
-      ':sk': {'S': 'PROGRESS'}
+      ':pk': 'USER#' + sub,
+      ':sk': 'PROGRESS#'
     }
   )
-  if 'Item' in results:
-    return json.dumps(results['Items'])
+  if 'Items' in results:
+    return results['Items']
 
   return
 
