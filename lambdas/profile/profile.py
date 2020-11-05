@@ -75,14 +75,13 @@ def _get_story_progress(sub, table, story_id):
 
 def _update_story_progress(sub, table, event):
   now = datetime.now()
+  dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+  story_id = event['pathParameters']['storyId']
   progressdata = json.loads(event['body'])
   progressdata.update({'PK': 'USER#' + sub,
                        'SK': "PROGRESS#" + story_id,
                        'timestamp': dt_string})
-  table.put_item(Item=profiledata)
-  return '{"status":"profile_updated"}'
-                      
-  table.put_item(Item=profiledata)
+  table.put_item(Item=progressdata)
   return '{"status":"progress_updated"}'
 
 def profile_handler(event, context):
