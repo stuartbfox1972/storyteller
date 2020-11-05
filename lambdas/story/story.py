@@ -5,7 +5,7 @@ import json
 import os
 import boto3
 
-from boto3.dynamodb.conditions import Key, Attr
+#from boto3.dynamodb.conditions import Key, Attr
 #from aws_xray_sdk.core import xray_recorder
 #from aws_xray_sdk.core import patch_all
 #patch_all()
@@ -44,7 +44,7 @@ def story_handler(event, context):
 
     return json.dumps(results, indent=4, cls=DecimalEncoder)
 
-  if event['routeKey'] == "GET /api/v1.0/story/{id}":
+  if event['routeKey'] == "GET /api/v1.0/story/{storyId}":
     story_id = "STORY#" + event['pathParameters']['id']
     result = table.get_item(Key={'PK': story_id, 'SK': "DETAILS"},
                             ProjectionExpression="ageRange, \
@@ -64,9 +64,9 @@ def story_handler(event, context):
     message = prep_response('{"message": "Unknown story"}', 404)
     return message
 
-  if event['routeKey'] == "GET /api/v1.0/story/{id}/{paragraph}":
-    story_id = "STORY#" + event['pathParameters']['id']
-    paragraph_id = "PARAGRAPH#" + event['pathParameters']['paragraph']
+  if event['routeKey'] == "GET /api/v1.0/story/{storyId}/{paragraphId}":
+    story_id = "STORY#" + event['pathParameters']['storyId']
+    paragraph_id = "PARAGRAPH#" + event['pathParameters']['paragraphId']
     result = table.get_item(Key={'PK': story_id, 'SK': paragraph_id},
                             ProjectionExpression="body,choices,paragraphId,storyId"
                            )

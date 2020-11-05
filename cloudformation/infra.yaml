@@ -260,7 +260,7 @@ Resources:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref HttpApi
-      RouteKey: "GET /api/v1.0/story/{id}"
+      RouteKey: "GET /api/v1.0/story/{storyId}"
       AuthorizationType: JWT
       AuthorizerId: !Ref HttpApiAuthorizer
       Target: !Join
@@ -272,7 +272,7 @@ Resources:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref HttpApi
-      RouteKey: "GET /api/v1.0/story/{id}/{paragraph}"
+      RouteKey: "GET /api/v1.0/story/{storyId}/{paragraphId}"
       AuthorizationType: JWT
       AuthorizerId: !Ref HttpApiAuthorizer
       Target: !Join
@@ -297,6 +297,30 @@ Resources:
     Properties:
       ApiId: !Ref HttpApi
       RouteKey: "POST /api/v1.0/profile"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref HttpApiAuthorizer
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref HttpProfileIntegration
+
+  HttpApiAllProgressRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "GET /api/v1.0/profile/progress"
+      AuthorizationType: JWT
+      AuthorizerId: !Ref HttpApiAuthorizer
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref HttpProfileIntegration
+
+  HttpApiGetProgressRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref HttpApi
+      RouteKey: "GET /api/v1.0/profile/progress/{storyId}"
       AuthorizationType: JWT
       AuthorizerId: !Ref HttpApiAuthorizer
       Target: !Join
