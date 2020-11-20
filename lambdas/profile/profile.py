@@ -4,9 +4,9 @@ import os
 import boto3
 
 from datetime import datetime
-from aws_xray_sdk.core import xray_recorder
-from aws_xray_sdk.core import patch_all
-patch_all()
+# from aws_xray_sdk.core import xray_recorder
+# from aws_xray_sdk.core import patch_all
+# patch_all()
 
 def _clean_results(result):
   data = result['Item']
