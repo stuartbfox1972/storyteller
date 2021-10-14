@@ -51,6 +51,14 @@ Resources:
           AttributeType: "S"
       BillingMode: PAY_PER_REQUEST
       GlobalSecondaryIndexes: 
+        - IndexName: "Inverse"
+	  KeySchema:
+	    - AttributeName: "PK"
+              KeyType: RANGE
+	    - AttributeName: "SK"
+              KeyType: HASH
+	  Projection:
+            ProjectionType: "ALL"
         - IndexName: "ListOfStories"
           KeySchema:
             - AttributeName: "GSIPK1"
@@ -135,11 +143,17 @@ Resources:
     Type: AWS::Cognito::UserPoolClient
     Properties:
       ClientName: cognito-frontend
+      AllowedOAuthScopes:
+        - openid
+      ReadAttributes:
+        - email
+        - email_verified
       ExplicitAuthFlows:
         - ALLOW_USER_PASSWORD_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
-        - ALLOW_USER_SRP_AUTH
+        #- ALLOW_USER_SRP_AUTH
       UserPoolId: !Ref UserPool
+      PreventUserExistenceErrors: ENABLED
 
   ## Route53 Config Section
   ApiDNSRecord:

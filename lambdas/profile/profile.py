@@ -8,6 +8,15 @@ from aws_xray_sdk.core import xray_recorder
 from aws_xray_sdk.core import patch_all
 patch_all()
 
+class DecimalEncoder(json.JSONEncoder):
+  """Some funky magic from StackOverflow"""
+  def default(self, o):
+    if isinstance(o, decimal.Decimal):
+      return str(o)
+    if isinstance(o, set):
+      return list(o)
+    return super(DecimalEncoder, self).default(o)
+
 def _clean_results(result):
   data = result['Item']
   data.pop('PK')
@@ -30,7 +39,7 @@ def _create_get(sub, username, table):
                          'username': username})
     return {"status": "profile_created"}
 
-  return json.dumps(_clean_results(result))
+  return json.dumps(_clean_results(result), indent=4, cls=DecimalEncoder)
 
 def _update(sub, username, table, event):
   profiledata = json.loads(event['body'])
@@ -65,7 +74,7 @@ def _get_story_progress(sub, table, story_id):
     return {"status": "no_progress_tracked"}
 
   message = _clean_results(result)
-  return json.dumps(message)
+  return json.dumps(message, indent=4, cls=DecimalEncoder)
 
 def _update_story_progress(sub, table, event):
   now = datetime.now()

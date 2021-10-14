@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+
+Parameters:
+  appname:
+    Type: String
+  appenv:
+    Type: String
+    AllowedValues:
+      - dev
+      - prod
+    Default: dev
+  postman:
+    Description: Deploy with Postman auth endpoint
+    Default: "Yes"
+    Type: String
+    AllowedValues:
+      - "Yes"
+      - "No"
+    ConstraintDescription: Deploy with Postman auth endpoint
+    
+Conditions:
+  UsePostman: !Equals
+    - !Ref postman
+    - "Yes"
+
+Resources:
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Description: Cognito to HTTP API demo
+      CorsConfiguration:
+        AllowMethods:
+          - GET
+        AllowOrigins:
+          - !Sub https://${appname}-${appenv}.awsfox.ca
+      Auth:
+        Authorizers:
+          OAuth2Authorizer:
+            AuthorizationScopes:
+              - email
+            IdentitySource: "$request.header.Authorization"
+            JwtConfiguration:
+              issuer: !Sub https://cognito-idp.${AWS::Region}.amazonaws.com/${MyCognitoUserPool}
+              audience:
+                - !Ref MyCognitoUserPoolClient
+        DefaultAuthorizer: OAuth2Authorizer
+
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./lambdas/debug/
+      Handler: debug.debug_handler
+      Runtime: python3.9
+      Events:
+        AppApi:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /
+            Method: get
+
+  MyCognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${appname}-${appenv}
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+          TemporaryPasswordValidityDays: 1
+      UsernameConfiguration:
+         CaseSensitive: false
+      UsernameAttributes:
+        - email
+      UserPoolAddOns:
+        AdvancedSecurityMode: AUDIT
+      Schema:
+        - AttributeDataType: String
+          Name: email
+          Required: true
+  
+  MyCognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref MyCognitoUserPool
+      GenerateSecret: false
+      AllowedOAuthFlowsUserPoolClient: true
+      #ExplicitAuthFlows:
+      #  - ALLOW_USER_PASSWORD_AUTH
+      #  - ALLOW_REFRESH_TOKEN_AUTH
+      SupportedIdentityProviders:
+        - COGNITO
+      AllowedOAuthFlows: 
+        - code
+        - !If [UsePostman, implicit, !Ref AWS::NoValue] # Implicit is only used for testing with postman and should not be in production.
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      CallbackURLs: 
+        - !Sub https://${appname}-${appenv}.awsfox.ca
+        - !If [UsePostman, https://oauth.pstmn.io/v1/callback, !Ref AWS::NoValue]
+      LogoutURLs: 
+        - !Sub https://${appname}-${appenv}.awsfox.ca
+        - !If [UsePostman, https://oauth.pstmn.io/v1/callback, !Ref AWS::NoValue]
+
+  MyCognitoUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties: 
+      Domain: !Sub ${appname}-${appenv}
+      UserPoolId: !Ref MyCognitoUserPool
+

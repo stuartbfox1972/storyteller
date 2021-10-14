@@ -1,16 +1,36 @@
 <!doctype html>
-<html>
+
+<html lang="en">
+
 <head>
-  <meta charset="utf-8">
-  <title>Story Teller</title>
-  <base href="/">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <!-- Cognito -->
-  <script src="/js/aws-cognito-sdk.min.js"></script>
-  <script src="/js/amazon-cognito-identity.min.js"></script>
-  <script src="/js/aws-sdk-2.7.18.min.js"></script>
-  <!-- /Cognito -->
-
+    <meta charset="utf-8">
+    <title>Cognito Demo</title>
+    <meta name="description" content="My Application">
+    <meta name="author" content="Your Name">
 </head>
+
+<body>
+    <h1>Cognito User Pools Tokens</h1>
+    Modified version of <a href="https://amzn.to/3cgys5v">https://amzn.to/3cgys5v</a>
+
+    <p style="white-space:pre-line;" id="token_status"></p>
+
+    <h2>Id Token</h2>
+    <p id="id_token_raw" style="white-space:pre-line; width: 1200px; word-wrap: break-word; color: blue;"></p>
+    <pre id="id_token" style="width: 1200px;"></pre>    
+
+    <h2>Access Token</h2>
+    <p id="access_token_raw" style="white-space:pre-line; width: 1200px; word-wrap: break-word; color: blue;"></p>
+    <pre id="access_token" style="width: 1200px;"></pre>    
+
+    <h2>User Profile</h2>
+    <pre id="userInfo" style="width: 1200px;"></pre>    
+
+    <script language="JavaScript" type="text/javascript"
+        src="https://kjur.github.io/jsrsasign/jsrsasign-latest-all-min.js">
+        </script>
+    <script src="js/verifier.js"></script>
+    <script src="js/userprofile.js"></script>
+</body>
+
+</html>

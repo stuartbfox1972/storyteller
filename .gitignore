@@ -5,3 +5,4 @@ node_modules
 .vscode
 scripts/config.txt
 scripts/load.json
+samconfig.toml

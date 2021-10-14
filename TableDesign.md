@@ -7,7 +7,7 @@
 ||PARAGRAPH#number|body,next,previous|
 ||REVIEW#reviewId|displayName,rating,comments|
 |USER#userId|PROFILE|displayName,email,dob,langs[]|
-||PROGRESS#storyId|paragraphId|
+||PROGRESS#storyId|paragraphId,timestamp,mode|
 |TAG#tag|STORY#storyId|displayName,rating|
 
 ## Indexes
