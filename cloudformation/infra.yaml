@@ -52,17 +52,17 @@ Resources:
       BillingMode: PAY_PER_REQUEST
       GlobalSecondaryIndexes: 
         - IndexName: "Inverse"
-	  KeySchema:
-	    - AttributeName: "PK"
-              KeyType: RANGE
-	    - AttributeName: "SK"
-              KeyType: HASH
-	  Projection:
-            ProjectionType: "ALL"
-        - IndexName: "ListOfStories"
-          KeySchema:
-            - AttributeName: "GSIPK1"
-              KeyType: "HASH"
+    KeySchema:
+      - AttributeName: "PK"
+        KeyType: RANGE
+      - AttributeName: "SK"
+        KeyType: HASH
+    Projection:
+      ProjectionType: "ALL"
+      - IndexName: "ListOfStories"
+        KeySchema:
+      - AttributeName: "GSIPK1"
+        KeyType: "HASH"
           Projection:
             NonKeyAttributes:
               - "ageRange"
