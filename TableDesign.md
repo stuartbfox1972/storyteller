@@ -6,7 +6,7 @@
 |STORY#storyId|STORY#DETAILS|storyId,GSIPK1,publishDate,author,ageRange,title,tags[],intro,lang|
 ||PARAGRAPH#number|body,next,previous|
 ||REVIEW#reviewId|displayName,rating,comments|
-|USER#userId|PROFILE|displayName,email,dob,langs[]|
+|USER#userId|PROFILE|displayName,email,dob,languages[]|
 ||PROGRESS#storyId|paragraphId,timestamp,mode|
 |TAG#tag|STORY#storyId|displayName,rating|
 
@@ -14,12 +14,12 @@
 ### ListOfStories
 |PK|SK|ATTR|
 |--|--|--|
-|STORY#DETAILS|views, ageRange, author, storyId, tags, title|
+|STORY#DETAILS|storyId|views, ageRange, author, storyId, tags, title|
 
 ### GroupStoriesByAgeRangeIndex
 |PK|ATTR|
 |--|--|
-|ageRange|views, tags, title, author|
+|ageRange|storyId,views, tags, title, author|
 
 ### GroupStoriesByAuthorIndex
 |PK|ATTR|
